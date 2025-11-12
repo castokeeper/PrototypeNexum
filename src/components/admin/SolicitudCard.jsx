@@ -99,4 +99,68 @@ SolicitudCard.propTypes = {
   onRechazar: PropTypes.func.isRequired
 };
 
+// Estilos
+const cardStyle = {
+  backgroundColor: 'var(--bg-card)',
+  borderRadius: '0.75rem',
+  boxShadow: 'var(--shadow-md)',
+  overflow: 'hidden',
+  transition: 'all 0.2s ease',
+  border: '1px solid var(--border-color)'
+};
+
+const cardHeaderStyle = {
+  padding: '1rem',
+  backgroundColor: 'var(--bg-hover)',
+  borderBottom: '1px solid var(--border-color)',
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  transition: 'background-color 0.3s ease'
+};
+
+const badgeStyle = {
+  padding: '0.25rem 0.75rem',
+  borderRadius: '9999px',
+  color: 'white',
+  fontSize: '0.875rem',
+  fontWeight: '600',
+  transition: 'all 0.2s ease'
+};
+
+const cardBodyStyle = {
+  padding: '1.5rem',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '1rem'
+};
+
+const nameStyle = {
+  fontSize: '1.25rem',
+  fontWeight: '600',
+  color: 'var(--text-primary)',
+  marginBottom: '0.5rem',
+  transition: 'color 0.3s ease'
+};
+
+const infoGridStyle = {
+  display: 'grid',
+  gridTemplateColumns: '1fr',
+  gap: '0.5rem',
+  fontSize: '0.875rem',
+  color: 'var(--text-secondary)',
+  transition: 'color 0.3s ease'
+};
+
+const infoItemStyle = {
+  padding: '0.25rem 0'
+};
+
+const actionsStyle = {
+  display: 'flex',
+  gap: '0.5rem',
+  marginTop: '0.5rem'
+};
+
+export default SolicitudCard;
 

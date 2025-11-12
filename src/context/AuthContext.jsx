@@ -10,12 +10,33 @@ export const useAuth = () => {
   return context;
 };
 
-// Usuarios autorizados (en producción esto vendría de una base de datos)
-const USUARIOS_AUTORIZADOS = [
-  { username: 'admin', password: 'admin123', nombre: 'Administrador' },
-  { username: 'director', password: 'dir123', nombre: 'Director' },
-  { username: 'control', password: 'ctrl123', nombre: 'Control Escolar' }
-];
+// Cargar usuarios desde variables de entorno
+// Formato: username:password:nombre,username:password:nombre
+const loadUsersFromEnv = () => {
+  const usersString = import.meta.env.VITE_AUTH_USERS;
+
+  if (!usersString) {
+    console.warn('⚠️ No se encontraron usuarios en variables de entorno. Usando usuarios por defecto.');
+    // Usuarios por defecto solo para desarrollo
+    return [
+      { username: 'admin', password: 'admin123', nombre: 'Administrador' },
+      { username: 'director', password: 'dir123', nombre: 'Director' },
+      { username: 'control', password: 'ctrl123', nombre: 'Control Escolar' }
+    ];
+  }
+
+  try {
+    return usersString.split(',').map(userStr => {
+      const [username, password, nombre] = userStr.split(':');
+      return { username: username.trim(), password: password.trim(), nombre: nombre.trim() };
+    });
+  } catch (error) {
+    console.error('Error al parsear usuarios de entorno:', error);
+    return [];
+  }
+};
+
+const USUARIOS_AUTORIZADOS = loadUsersFromEnv();
 
 export const AuthProvider = ({ children }) => {
   const [usuario, setUsuario] = useState(null);

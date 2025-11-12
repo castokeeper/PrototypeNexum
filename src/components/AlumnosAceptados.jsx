@@ -1,24 +1,16 @@
 import { useSolicitudes } from '../context/SolicitudesContext';
 import { CheckCircle, User, GraduationCap, Clock, FileText } from 'lucide-react';
+import { Card } from './common';
+import { formatearNombreCompleto, formatearFecha, formatearTipoSolicitud } from '../utils';
 
 const AlumnosAceptados = () => {
   const { aceptados } = useSolicitudes();
 
-  const formatearFecha = (fecha) => {
-    return new Date(fecha).toLocaleDateString('es-MX', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
   return (
     <div style={containerStyle}>
-      <div style={headerStyle}>
+      <Card padding="comfortable" style={{ marginBottom: '2rem' }}>
         <div style={headerContentStyle}>
-          <CheckCircle size={48} color="#10b981" />
+          <CheckCircle size={48} color="var(--success-green)" />
           <div>
             <h2 style={titleStyle}>Alumnos Aceptados</h2>
             <p style={subtitleStyle}>
@@ -26,28 +18,30 @@ const AlumnosAceptados = () => {
             </p>
           </div>
         </div>
-      </div>
+      </Card>
 
       {aceptados.length === 0 ? (
-        <div style={emptyStateStyle}>
-          <CheckCircle size={64} color="#d1d5db" />
-          <h3 style={emptyTitleStyle}>No hay alumnos aceptados aún</h3>
-          <p style={emptyTextStyle}>
-            Los alumnos aparecerán aquí una vez que sus solicitudes sean aprobadas
-          </p>
-        </div>
+        <Card>
+          <div style={emptyStateStyle}>
+            <CheckCircle size={64} color="var(--text-tertiary)" />
+            <h3 style={emptyTitleStyle}>No hay alumnos aceptados aún</h3>
+            <p style={emptyTextStyle}>
+              Los alumnos aparecerán aquí una vez que sus solicitudes sean aprobadas
+            </p>
+          </div>
+        </Card>
       ) : (
         <div style={gridStyle}>
           {aceptados.map((alumno) => (
-            <div key={alumno.id} style={cardStyle}>
+            <Card key={alumno.id} hoverable padding="normal" style={cardStyle}>
               <div style={cardHeaderStyle}>
                 <span style={{
                   ...badgeStyle,
-                  backgroundColor: alumno.tipo === 'nuevo-ingreso' ? '#3b82f6' : '#8b5cf6'
+                  backgroundColor: alumno.tipo === 'nuevo-ingreso' ? 'var(--primary-blue-light)' : 'var(--purple)'
                 }}>
-                  {alumno.tipo === 'nuevo-ingreso' ? 'Nuevo Ingreso' : 'Reinscripción'}
+                  {formatearTipoSolicitud(alumno.tipo)}
                 </span>
-                <span style={{...badgeStyle, backgroundColor: '#10b981'}}>
+                <span style={{ ...badgeStyle, backgroundColor: 'var(--success-green)' }}>
                   <CheckCircle size={16} />
                   Aceptado
                 </span>
@@ -56,11 +50,11 @@ const AlumnosAceptados = () => {
               <div style={cardBodyStyle}>
                 <div style={avatarSectionStyle}>
                   <div style={avatarStyle}>
-                    <User size={40} color="#1e40af" />
+                    <User size={40} color="var(--primary-blue)" />
                   </div>
                   <div>
                     <h3 style={nameStyle}>
-                      {alumno.nombre} {alumno.apellidoPaterno} {alumno.apellidoMaterno}
+                      {formatearNombreCompleto(alumno.nombre, alumno.apellidoPaterno, alumno.apellidoMaterno)}
                     </h3>
                     {alumno.matricula && (
                       <p style={matriculaStyle}>Matrícula: {alumno.matricula}</p>
@@ -72,7 +66,7 @@ const AlumnosAceptados = () => {
 
                 <div style={infoSectionStyle}>
                   <div style={infoItemStyle}>
-                    <GraduationCap size={18} color="#6b7280" />
+                    <GraduationCap size={18} color="var(--text-secondary)" />
                     <div>
                       <p style={infoLabelStyle}>Carrera</p>
                       <p style={infoValueStyle}>{alumno.carrera}</p>
@@ -81,7 +75,7 @@ const AlumnosAceptados = () => {
 
                   {alumno.grado && (
                     <div style={infoItemStyle}>
-                      <FileText size={18} color="#6b7280" />
+                      <FileText size={18} color="var(--text-secondary)" />
                       <div>
                         <p style={infoLabelStyle}>Grado y Grupo</p>
                         <p style={infoValueStyle}>{alumno.grado}° - Grupo {alumno.grupo}</p>
@@ -90,7 +84,7 @@ const AlumnosAceptados = () => {
                   )}
 
                   <div style={infoItemStyle}>
-                    <Clock size={18} color="#6b7280" />
+                    <Clock size={18} color="var(--text-secondary)" />
                     <div>
                       <p style={infoLabelStyle}>Turno</p>
                       <p style={infoValueStyle}>{alumno.turno}</p>
@@ -109,12 +103,12 @@ const AlumnosAceptados = () => {
                   </div>
                   {alumno.fechaAceptacion && (
                     <div style={dateAcceptedStyle}>
-                      Aceptado el: {formatearFecha(alumno.fechaAceptacion)}
+                      ✅ Aceptado el: {formatearFecha(alumno.fechaAceptacion)}
                     </div>
                   )}
                 </div>
               </div>
-            </div>
+            </Card>
           ))}
         </div>
       )}
@@ -122,20 +116,12 @@ const AlumnosAceptados = () => {
   );
 };
 
-// Estilos
+// Estilos mínimos
 const containerStyle = {
   maxWidth: '1400px',
   margin: '0 auto',
   padding: '2rem',
   minHeight: 'calc(100vh - 80px)'
-};
-
-const headerStyle = {
-  marginBottom: '2rem',
-  backgroundColor: 'white',
-  padding: '2rem',
-  borderRadius: '0.5rem',
-  boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
 };
 
 const headerContentStyle = {
@@ -146,35 +132,36 @@ const headerContentStyle = {
 
 const titleStyle = {
   fontSize: '2rem',
-  fontWeight: 'bold',
-  color: '#1e40af',
-  margin: 0
+  fontWeight: '700',
+  color: 'var(--primary-blue)',
+  margin: 0,
+  transition: 'color 0.3s ease'
 };
 
 const subtitleStyle = {
-  color: '#6b7280',
+  color: 'var(--text-secondary)',
   fontSize: '1rem',
-  margin: '0.5rem 0 0 0'
+  margin: '0.5rem 0 0 0',
+  transition: 'color 0.3s ease'
 };
 
 const emptyStateStyle = {
-  backgroundColor: 'white',
   padding: '4rem 2rem',
-  borderRadius: '0.5rem',
-  textAlign: 'center',
-  boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+  textAlign: 'center'
 };
 
 const emptyTitleStyle = {
   fontSize: '1.5rem',
-  color: '#374151',
+  color: 'var(--text-primary)',
   marginTop: '1rem',
-  marginBottom: '0.5rem'
+  marginBottom: '0.5rem',
+  transition: 'color 0.3s ease'
 };
 
 const emptyTextStyle = {
-  color: '#6b7280',
-  fontSize: '1rem'
+  color: 'var(--text-secondary)',
+  fontSize: '1rem',
+  transition: 'color 0.3s ease'
 };
 
 const gridStyle = {
@@ -184,23 +171,20 @@ const gridStyle = {
 };
 
 const cardStyle = {
-  backgroundColor: 'white',
-  borderRadius: '0.5rem',
-  boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-  overflow: 'hidden',
-  transition: 'transform 0.2s, box-shadow 0.2s',
-  border: '2px solid #10b981'
+  border: '2px solid var(--success-green)',
+  transition: 'all 0.2s ease'
 };
 
 const cardHeaderStyle = {
-  padding: '1rem 1.5rem',
-  backgroundColor: '#f0fdf4',
-  borderBottom: '1px solid #bbf7d0',
+  padding: '1rem',
+  backgroundColor: 'var(--bg-hover)',
+  borderBottom: '1px solid var(--border-color)',
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'center',
   gap: '0.5rem',
-  flexWrap: 'wrap'
+  flexWrap: 'wrap',
+  transition: 'background-color 0.3s ease'
 };
 
 const badgeStyle = {
@@ -216,7 +200,6 @@ const badgeStyle = {
 };
 
 const cardBodyStyle = {
-  padding: '1.5rem',
   display: 'flex',
   flexDirection: 'column',
   gap: '1rem'
@@ -232,31 +215,33 @@ const avatarStyle = {
   width: '64px',
   height: '64px',
   borderRadius: '50%',
-  backgroundColor: '#dbeafe',
+  backgroundColor: 'rgba(59, 130, 246, 0.1)',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  flexShrink: 0
+  flexShrink: 0,
+  transition: 'background-color 0.3s ease'
 };
 
 const nameStyle = {
   fontSize: '1.25rem',
   fontWeight: '700',
-  color: '#111827',
-  margin: 0
+  color: 'var(--text-primary)',
+  margin: 0,
+  transition: 'color 0.3s ease'
 };
 
 const matriculaStyle = {
   fontSize: '0.875rem',
-  color: '#6b7280',
-  margin: '0.25rem 0 0 0',
-  fontWeight: '500'
+  color: 'var(--text-secondary)',
+  marginTop: '0.25rem',
+  transition: 'color 0.3s ease'
 };
 
 const dividerStyle = {
   height: '1px',
-  backgroundColor: '#e5e7eb',
-  margin: '0.5rem 0'
+  backgroundColor: 'var(--border-color)',
+  transition: 'background-color 0.3s ease'
 };
 
 const infoSectionStyle = {
@@ -273,18 +258,20 @@ const infoItemStyle = {
 
 const infoLabelStyle = {
   fontSize: '0.75rem',
-  color: '#6b7280',
-  fontWeight: '500',
+  color: 'var(--text-secondary)',
   margin: 0,
+  fontWeight: '500',
   textTransform: 'uppercase',
-  letterSpacing: '0.05em'
+  letterSpacing: '0.05em',
+  transition: 'color 0.3s ease'
 };
 
 const infoValueStyle = {
-  fontSize: '0.95rem',
-  color: '#111827',
+  fontSize: '0.875rem',
+  color: 'var(--text-primary)',
+  margin: '0.125rem 0 0 0',
   fontWeight: '600',
-  margin: '0.125rem 0 0 0'
+  transition: 'color 0.3s ease'
 };
 
 const contactSectionStyle = {
@@ -295,19 +282,20 @@ const contactSectionStyle = {
 };
 
 const contactItemStyle = {
-  color: '#4b5563',
-  wordBreak: 'break-word'
+  color: 'var(--text-secondary)',
+  transition: 'color 0.3s ease'
 };
 
 const dateAcceptedStyle = {
   marginTop: '0.5rem',
   padding: '0.5rem',
-  backgroundColor: '#f0fdf4',
+  backgroundColor: 'rgba(16, 185, 129, 0.1)',
   borderRadius: '0.375rem',
-  fontSize: '0.8rem',
-  color: '#047857',
+  fontSize: '0.8125rem',
+  color: 'var(--success-green)',
   fontWeight: '500',
-  textAlign: 'center'
+  textAlign: 'center',
+  transition: 'background-color 0.3s ease'
 };
 
 export default AlumnosAceptados;

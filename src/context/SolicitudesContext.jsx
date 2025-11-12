@@ -71,8 +71,18 @@ export const SolicitudesProvider = ({ children }) => {
   const actualizarEstatus = async (id, nuevoEstatus) => {
     try {
       await dbService.actualizarEstatusSolicitud(id, nuevoEstatus);
-      await cargarSolicitudes();
-      await cargarAceptados();
+
+      // Optimización: actualizar estado local sin recargar todo
+      setSolicitudes(prev =>
+        prev.map(sol =>
+          sol.id === id ? { ...sol, estatus: nuevoEstatus } : sol
+        )
+      );
+
+      // Si fue aprobada, actualizar también la lista de aceptados
+      if (nuevoEstatus === 'aprobada') {
+        await cargarAceptados();
+      }
     } catch (error) {
       console.error('Error al actualizar estatus:', error);
       throw error;

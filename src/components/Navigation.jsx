@@ -33,7 +33,7 @@ const Navigation = () => {
         gap: '1rem'
       }}>
         <h1 style={{ color: 'white', margin: 0, fontSize: '1.5rem', fontWeight: '600' }}>
-          Sistema de Reinscripciones
+          Nexus
         </h1>
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
           <Link to="/" style={linkStyle}>

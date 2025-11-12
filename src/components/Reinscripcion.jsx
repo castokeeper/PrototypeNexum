@@ -1,171 +1,164 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSolicitudes } from '../context/SolicitudesContext';
 import { toast } from 'react-toastify';
-import { Upload, Send } from 'lucide-react';
+import { Upload, Send, Mail, Phone, Hash, BookOpen } from 'lucide-react';
+import { Button, Input, Card } from './common';
+import { useForm, useFileUpload } from '../hooks';
+import { validarFormularioReinscripcion, CARRERAS, TURNOS, SEMESTRES, GRUPOS } from '../utils';
+
+const initialFormData = {
+  nombre: '',
+  apellidoPaterno: '',
+  apellidoMaterno: '',
+  matricula: '',
+  grado: '',
+  grupo: '',
+  carrera: '',
+  turno: '',
+  telefono: '',
+  email: ''
+};
 
 const Reinscripcion = () => {
   const navigate = useNavigate();
   const { agregarSolicitud } = useSolicitudes();
 
-  const [formData, setFormData] = useState({
-    nombre: '',
-    apellidoPaterno: '',
-    apellidoMaterno: '',
-    matricula: '',
-    grado: '',
-    grupo: '',
-    carrera: '',
-    turno: '',
-    telefono: '',
-    email: ''
-  });
+  // Usar custom hooks
+  const {
+    formData,
+    errors,
+    handleChange,
+    handleBlur,
+    validate,
+    resetForm,
+    isSubmitting,
+    setIsSubmitting
+  } = useForm(initialFormData, validarFormularioReinscripcion);
 
-  const [comprobante, setComprobante] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState(null);
+  const {
+    file: comprobante,
+    preview: previewUrl,
+    error: fileError,
+    handleFileChange,
+    clearFile
+  } = useFileUpload();
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
-
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setComprobante(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviewUrl(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validar que todos los campos estén completos
-    const camposVacios = Object.values(formData).some(value => !value);
-    if (camposVacios || !comprobante) {
-      toast.error('Por favor completa todos los campos y sube el comprobante de pago');
+    // Validar todo el formulario
+    if (!validate(comprobante)) {
+      toast.error('Por favor corrige los errores en el formulario');
       return;
     }
 
-    // Agregar solicitud
-    agregarSolicitud({
-      tipo: 'reinscripcion',
-      ...formData,
-      comprobante: previewUrl
-    });
+    setIsSubmitting(true);
 
-    toast.success('Solicitud de reinscripción enviada correctamente');
+    try {
+      await agregarSolicitud({
+        tipo: 'reinscripcion',
+        ...formData,
+        comprobante: previewUrl
+      });
 
-    // Limpiar formulario
-    setFormData({
-      nombre: '',
-      apellidoPaterno: '',
-      apellidoMaterno: '',
-      matricula: '',
-      grado: '',
-      grupo: '',
-      carrera: '',
-      turno: '',
-      telefono: '',
-      email: ''
-    });
-    setComprobante(null);
-    setPreviewUrl(null);
+      toast.success('Solicitud de reinscripción enviada correctamente');
+      resetForm();
+      clearFile();
 
-    // Redirigir después de 2 segundos
-    setTimeout(() => {
-      navigate('/');
-    }, 2000);
+      // Redirigir después de 1.5 segundos
+      setTimeout(() => {
+        navigate('/');
+      }, 1500);
+    } catch (error) {
+      toast.error('Error al enviar la solicitud. Por favor intenta de nuevo.');
+      console.error('Error al enviar solicitud:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <div style={containerStyle}>
-      <div style={cardStyle}>
-        <h2 style={titleStyle}>Reinscripción</h2>
+      <Card title="Reinscripción" subtitle="Completa todos los campos para renovar tu matrícula">
         <form onSubmit={handleSubmit} style={formStyle}>
 
           <div style={sectionStyle}>
             <h3 style={sectionTitleStyle}>Datos del Alumno</h3>
 
-            <div style={inputGroupStyle}>
-              <label style={labelStyle}>Nombre(s)</label>
-              <input
+            <Input
+              label="Nombre(s)"
+              name="nombre"
+              type="text"
+              value={formData.nombre}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              error={errors.nombre}
+              required
+            />
+
+            <div style={rowStyle}>
+              <Input
+                label="Apellido Paterno"
+                name="apellidoPaterno"
                 type="text"
-                name="nombre"
-                value={formData.nombre}
+                value={formData.apellidoPaterno}
                 onChange={handleChange}
-                style={inputStyle}
+                onBlur={handleBlur}
+                error={errors.apellidoPaterno}
+                required
+              />
+
+              <Input
+                label="Apellido Materno"
+                name="apellidoMaterno"
+                type="text"
+                value={formData.apellidoMaterno}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                error={errors.apellidoMaterno}
                 required
               />
             </div>
 
+            <Input
+              label="Matrícula"
+              name="matricula"
+              type="text"
+              value={formData.matricula}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              error={errors.matricula}
+              placeholder="Ej: 20221234"
+              icon={<Hash size={18} />}
+              required
+            />
+
             <div style={rowStyle}>
-              <div style={inputGroupStyle}>
-                <label style={labelStyle}>Apellido Paterno</label>
-                <input
-                  type="text"
-                  name="apellidoPaterno"
-                  value={formData.apellidoPaterno}
-                  onChange={handleChange}
-                  style={inputStyle}
-                  required
-                />
-              </div>
-
-              <div style={inputGroupStyle}>
-                <label style={labelStyle}>Apellido Materno</label>
-                <input
-                  type="text"
-                  name="apellidoMaterno"
-                  value={formData.apellidoMaterno}
-                  onChange={handleChange}
-                  style={inputStyle}
-                  required
-                />
-              </div>
-            </div>
-
-            <div style={inputGroupStyle}>
-              <label style={labelStyle}>Matrícula</label>
-              <input
-                type="text"
-                name="matricula"
-                value={formData.matricula}
+              <Input
+                label="Teléfono"
+                name="telefono"
+                type="tel"
+                value={formData.telefono}
                 onChange={handleChange}
-                style={inputStyle}
-                placeholder="Ej: 20221234"
+                onBlur={handleBlur}
+                error={errors.telefono}
+                placeholder="10 dígitos"
+                icon={<Phone size={18} />}
                 required
               />
-            </div>
 
-            <div style={rowStyle}>
-              <div style={inputGroupStyle}>
-                <label style={labelStyle}>Teléfono</label>
-                <input
-                  type="tel"
-                  name="telefono"
-                  value={formData.telefono}
-                  onChange={handleChange}
-                  style={inputStyle}
-                  required
-                />
-              </div>
-
-              <div style={inputGroupStyle}>
-                <label style={labelStyle}>Email</label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  style={inputStyle}
-                  required
-                />
-              </div>
+              <Input
+                label="Email"
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                error={errors.email}
+                placeholder="correo@ejemplo.com"
+                icon={<Mail size={18} />}
+                required
+              />
             </div>
           </div>
 
@@ -174,74 +167,107 @@ const Reinscripcion = () => {
 
             <div style={rowStyle}>
               <div style={inputGroupStyle}>
-                <label style={labelStyle}>Grado</label>
+                <label style={labelStyle}>Grado (Semestre) *</label>
                 <select
                   name="grado"
                   value={formData.grado}
                   onChange={handleChange}
-                  style={inputStyle}
+                  onBlur={handleBlur}
+                  style={{
+                    ...inputStyle,
+                    borderColor: errors.grado ? 'var(--danger-red)' : 'var(--border-color)'
+                  }}
                   required
                 >
                   <option value="">Selecciona el grado</option>
-                  <option value="2">2° Semestre</option>
-                  <option value="3">3° Semestre</option>
-                  <option value="4">4° Semestre</option>
-                  <option value="5">5° Semestre</option>
-                  <option value="6">6° Semestre</option>
-                  <option value="7">7° Semestre</option>
-                  <option value="8">8° Semestre</option>
-                  <option value="9">9° Semestre</option>
+                  {SEMESTRES.map(semestre => (
+                    <option key={semestre.value} value={semestre.value}>
+                      {semestre.label}
+                    </option>
+                  ))}
                 </select>
+                {errors.grado && (
+                  <span style={{ fontSize: '0.875rem', color: 'var(--danger-red)' }}>
+                    {errors.grado}
+                  </span>
+                )}
               </div>
 
               <div style={inputGroupStyle}>
-                <label style={labelStyle}>Grupo</label>
-                <input
-                  type="text"
+                <label style={labelStyle}>Grupo *</label>
+                <select
                   name="grupo"
                   value={formData.grupo}
                   onChange={handleChange}
-                  style={inputStyle}
-                  placeholder="Ej: A, B, C"
-                  maxLength="2"
+                  onBlur={handleBlur}
+                  style={{
+                    ...inputStyle,
+                    borderColor: errors.grupo ? 'var(--danger-red)' : 'var(--border-color)'
+                  }}
                   required
-                />
+                >
+                  <option value="">Selecciona el grupo</option>
+                  {GRUPOS.map(grupo => (
+                    <option key={grupo} value={grupo}>{grupo}</option>
+                  ))}
+                </select>
+                {errors.grupo && (
+                  <span style={{ fontSize: '0.875rem', color: 'var(--danger-red)' }}>
+                    {errors.grupo}
+                  </span>
+                )}
               </div>
             </div>
 
             <div style={rowStyle}>
               <div style={inputGroupStyle}>
-                <label style={labelStyle}>Carrera</label>
+                <label style={labelStyle}>Carrera *</label>
                 <select
                   name="carrera"
                   value={formData.carrera}
                   onChange={handleChange}
-                  style={inputStyle}
+                  onBlur={handleBlur}
+                  style={{
+                    ...inputStyle,
+                    borderColor: errors.carrera ? 'var(--danger-red)' : 'var(--border-color)'
+                  }}
                   required
                 >
                   <option value="">Selecciona una carrera</option>
-                  <option value="Ingeniería en Sistemas">Ingeniería en Sistemas</option>
-                  <option value="Ingeniería Industrial">Ingeniería Industrial</option>
-                  <option value="Administración">Administración</option>
-                  <option value="Contaduría">Contaduría</option>
-                  <option value="Derecho">Derecho</option>
+                  {CARRERAS.map(carrera => (
+                    <option key={carrera} value={carrera}>{carrera}</option>
+                  ))}
                 </select>
+                {errors.carrera && (
+                  <span style={{ fontSize: '0.875rem', color: 'var(--danger-red)' }}>
+                    {errors.carrera}
+                  </span>
+                )}
               </div>
 
               <div style={inputGroupStyle}>
-                <label style={labelStyle}>Turno</label>
+                <label style={labelStyle}>Turno *</label>
                 <select
                   name="turno"
                   value={formData.turno}
                   onChange={handleChange}
-                  style={inputStyle}
+                  onBlur={handleBlur}
+                  style={{
+                    ...inputStyle,
+                    borderColor: errors.turno ? 'var(--danger-red)' : 'var(--border-color)'
+                  }}
                   required
                 >
                   <option value="">Selecciona un turno</option>
-                  <option value="Matutino">Matutino</option>
-                  <option value="Vespertino">Vespertino</option>
-                  <option value="Nocturno">Nocturno</option>
+                  {TURNOS.map(turno => (
+                    <option key={turno} value={turno}>{turno}</option>
+                  ))}
                 </select>
+                {errors.turno && (
+                  <span style={{ fontSize: '0.875rem', color: 'var(--danger-red)' }}>
+                    {errors.turno}
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -251,9 +277,12 @@ const Reinscripcion = () => {
 
             <div style={inputGroupStyle}>
               <label style={labelStyle}>
-                <div style={uploadButtonStyle}>
+                <div style={{
+                  ...uploadButtonStyle,
+                  borderColor: errors.archivo || fileError ? 'var(--danger-red)' : '#3b82f6'
+                }}>
                   <Upload size={20} />
-                  <span>{comprobante ? comprobante.name : 'Seleccionar comprobante'}</span>
+                  <span>{comprobante ? comprobante.name : 'Seleccionar comprobante (JPG, PNG, PDF - Max 5MB)'}</span>
                 </div>
                 <input
                   type="file"
@@ -263,45 +292,42 @@ const Reinscripcion = () => {
                   required
                 />
               </label>
+              {(errors.archivo || fileError) && (
+                <span style={{ fontSize: '0.875rem', color: 'var(--danger-red)' }}>
+                  {errors.archivo || fileError}
+                </span>
+              )}
 
               {previewUrl && (
                 <div style={previewStyle}>
-                  <img src={previewUrl} alt="Comprobante" style={{ maxWidth: '100%', maxHeight: '300px' }} />
+                  <img src={previewUrl} alt="Comprobante" style={{ maxWidth: '100%', maxHeight: '300px', borderRadius: '0.5rem' }} />
                 </div>
               )}
             </div>
           </div>
 
-          <button type="submit" style={submitButtonStyle}>
-            <Send size={20} />
-            <span>Enviar Solicitud de Reinscripción</span>
-          </button>
+          <Button
+            type="submit"
+            variant="success"
+            size="large"
+            fullWidth
+            icon={<Send size={20} />}
+            loading={isSubmitting}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Enviando...' : 'Enviar Solicitud'}
+          </Button>
         </form>
-      </div>
+      </Card>
     </div>
   );
 };
 
-// Estilos
+// Estilos mínimos (la mayoría ahora vienen de componentes)
 const containerStyle = {
   maxWidth: '900px',
   margin: '2rem auto',
   padding: '0 1rem'
-};
-
-const cardStyle = {
-  backgroundColor: 'white',
-  borderRadius: '0.5rem',
-  padding: '2rem',
-  boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-};
-
-const titleStyle = {
-  fontSize: '2rem',
-  fontWeight: 'bold',
-  color: '#1e40af',
-  marginBottom: '2rem',
-  textAlign: 'center'
 };
 
 const formStyle = {
@@ -319,10 +345,11 @@ const sectionStyle = {
 const sectionTitleStyle = {
   fontSize: '1.25rem',
   fontWeight: '600',
-  color: '#374151',
+  color: 'var(--text-primary)',
   marginBottom: '0.5rem',
   paddingBottom: '0.5rem',
-  borderBottom: '2px solid #e5e7eb'
+  borderBottom: '2px solid var(--border-color)',
+  transition: 'color 0.3s ease'
 };
 
 const rowStyle = {
@@ -339,16 +366,21 @@ const inputGroupStyle = {
 
 const labelStyle = {
   fontWeight: '500',
-  color: '#374151',
-  fontSize: '0.875rem'
+  color: 'var(--text-primary)',
+  fontSize: '0.875rem',
+  transition: 'color 0.3s ease'
 };
 
 const inputStyle = {
-  padding: '0.5rem',
-  border: '1px solid #d1d5db',
-  borderRadius: '0.375rem',
+  padding: '0.75rem',
+  border: '1px solid var(--border-color)',
+  borderRadius: '0.5rem',
   fontSize: '1rem',
-  width: '100%'
+  width: '100%',
+  backgroundColor: 'var(--bg-primary)',
+  color: 'var(--text-primary)',
+  transition: 'all 0.2s ease',
+  outline: 'none'
 };
 
 const uploadButtonStyle = {
@@ -356,37 +388,24 @@ const uploadButtonStyle = {
   alignItems: 'center',
   gap: '0.5rem',
   padding: '0.75rem 1rem',
-  backgroundColor: '#3b82f6',
+  backgroundColor: 'var(--primary-blue-light)',
   color: 'white',
-  borderRadius: '0.375rem',
+  borderRadius: '0.5rem',
   cursor: 'pointer',
   justifyContent: 'center',
-  transition: 'background-color 0.2s'
+  transition: 'all 0.2s ease',
+  border: '2px dashed transparent'
 };
 
 const previewStyle = {
   marginTop: '1rem',
   padding: '1rem',
-  border: '2px dashed #d1d5db',
-  borderRadius: '0.375rem',
+  border: '2px dashed var(--border-color)',
+  borderRadius: '0.5rem',
   display: 'flex',
-  justifyContent: 'center'
-};
-
-const submitButtonStyle = {
-  display: 'flex',
-  alignItems: 'center',
   justifyContent: 'center',
-  gap: '0.5rem',
-  padding: '1rem',
-  backgroundColor: '#10b981',
-  color: 'white',
-  border: 'none',
-  borderRadius: '0.375rem',
-  fontSize: '1.125rem',
-  fontWeight: '600',
-  cursor: 'pointer',
-  transition: 'background-color 0.2s'
+  backgroundColor: 'var(--bg-hover)',
+  transition: 'all 0.3s ease'
 };
 
 export default Reinscripcion;

@@ -1,26 +1,25 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { useTheme } from '../context/ThemeContext';
 import { toast } from 'react-toastify';
 import { Lock, User, LogIn, ShieldCheck } from 'lucide-react';
+import { Button, Input, Card } from './common';
 
 const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
-  const { isDark } = useTheme();
   const [credentials, setCredentials] = useState({
     username: '',
     password: ''
   });
-  const [focusedField, setFocusedField] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setCredentials({ ...credentials, [name]: value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!credentials.username || !credentials.password) {
@@ -28,108 +27,93 @@ const Login = () => {
       return;
     }
 
-    const result = login(credentials.username, credentials.password);
+    setIsSubmitting(true);
 
-    if (result.success) {
-      toast.success('¡Bienvenido al panel de administración!');
-      navigate('/admin');
-    } else {
-      toast.error(result.message);
+    try {
+      // Simular un pequeño delay para mejor UX
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      const result = login(credentials.username, credentials.password);
+
+      if (result.success) {
+        toast.success('¡Bienvenido al panel de administración!');
+        navigate('/admin');
+      } else {
+        toast.error(result.message);
+      }
+    } catch (error) {
+      toast.error('Error al iniciar sesión. Por favor intenta de nuevo.');
+      console.error('Error en login:', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
     <div style={containerStyle}>
-      <div style={cardStyle} className="fade-in">
+      <Card padding="comfortable" style={{ maxWidth: '450px', width: '100%' }}>
         <div style={headerStyle}>
-          <div style={{
-            ...iconContainerStyle,
-            backgroundColor: isDark ? 'rgba(59, 130, 246, 0.2)' : '#dbeafe'
-          }}>
-            <ShieldCheck size={48} color={isDark ? '#60a5fa' : '#1e40af'} />
+          <div style={iconContainerStyle}>
+            <ShieldCheck size={48} color="var(--primary-blue)" />
           </div>
           <h2 style={titleStyle}>Panel de Administración</h2>
           <p style={subtitleStyle}>Ingresa tus credenciales para continuar</p>
         </div>
 
         <form onSubmit={handleSubmit} style={formStyle}>
-          <div style={inputGroupStyle}>
-            <label style={labelStyle}>
-              <User size={18} />
-              <span>Usuario</span>
-            </label>
-            <input
-              type="text"
-              name="username"
-              value={credentials.username}
-              onChange={handleChange}
-              onFocus={() => setFocusedField('username')}
-              onBlur={() => setFocusedField(null)}
-              style={{
-                ...inputStyle,
-                ...(focusedField === 'username' ? inputFocusStyle : {})
-              }}
-              placeholder="Ingresa tu usuario"
-              autoComplete="username"
-              required
-            />
-          </div>
+          <Input
+            label="Usuario"
+            name="username"
+            type="text"
+            value={credentials.username}
+            onChange={handleChange}
+            placeholder="Ingresa tu usuario"
+            icon={<User size={18} />}
+            autoComplete="username"
+            required
+            disabled={isSubmitting}
+          />
 
-          <div style={inputGroupStyle}>
-            <label style={labelStyle}>
-              <Lock size={18} />
-              <span>Contraseña</span>
-            </label>
-            <input
-              type="password"
-              name="password"
-              value={credentials.password}
-              onChange={handleChange}
-              onFocus={() => setFocusedField('password')}
-              onBlur={() => setFocusedField(null)}
-              style={{
-                ...inputStyle,
-                ...(focusedField === 'password' ? inputFocusStyle : {})
-              }}
-              placeholder="Ingresa tu contraseña"
-              autoComplete="current-password"
-              required
-            />
-          </div>
+          <Input
+            label="Contraseña"
+            name="password"
+            type="password"
+            value={credentials.password}
+            onChange={handleChange}
+            placeholder="Ingresa tu contraseña"
+            icon={<Lock size={18} />}
+            autoComplete="current-password"
+            required
+            disabled={isSubmitting}
+          />
 
-          <button
+          <Button
             type="submit"
-            style={submitButtonStyle}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'var(--primary-blue-hover)';
-              e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow = 'var(--shadow-md)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'var(--primary-blue)';
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
-            }}
+            variant="primary"
+            size="large"
+            fullWidth
+            icon={<LogIn size={20} />}
+            loading={isSubmitting}
+            disabled={isSubmitting}
           >
-            <LogIn size={20} />
-            <span>Iniciar Sesión</span>
-          </button>
+            {isSubmitting ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+          </Button>
         </form>
 
         <div style={infoBoxStyle}>
           <p style={infoTitleStyle}>👤 Usuarios de demostración:</p>
           <ul style={infoListStyle}>
-            <li><strong>admin</strong> / admin123</li>
-            <li><strong>director</strong> / dir123</li>
-            <li><strong>control</strong> / ctrl123</li>
+            <li><strong>admin</strong> / admin123 - Administrador</li>
+            <li><strong>director</strong> / dir123 - Director</li>
+            <li><strong>control</strong> / ctrl123 - Control Escolar</li>
           </ul>
         </div>
-      </div>
+      </Card>
     </div>
   );
 };
 
-// Estilos
+// Estilos mínimos
 const containerStyle = {
   minHeight: 'calc(100vh - 80px)',
   display: 'flex',
@@ -138,17 +122,6 @@ const containerStyle = {
   padding: '2rem',
   backgroundColor: 'var(--bg-secondary)',
   transition: 'background-color 0.3s ease'
-};
-
-const cardStyle = {
-  backgroundColor: 'var(--bg-card)',
-  borderRadius: '1rem',
-  padding: '2.5rem',
-  boxShadow: 'var(--shadow-xl)',
-  maxWidth: '450px',
-  width: '100%',
-  border: '1px solid var(--border-color)',
-  transition: 'all 0.3s ease'
 };
 
 const headerStyle = {
@@ -161,6 +134,7 @@ const iconContainerStyle = {
   padding: '1rem',
   borderRadius: '50%',
   marginBottom: '1rem',
+  backgroundColor: 'rgba(59, 130, 246, 0.1)',
   transition: 'all 0.3s ease'
 };
 
@@ -181,66 +155,16 @@ const subtitleStyle = {
 const formStyle = {
   display: 'flex',
   flexDirection: 'column',
-  gap: '1.5rem'
-};
-
-const inputGroupStyle = {
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '0.5rem'
-};
-
-const labelStyle = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: '0.5rem',
-  fontWeight: '500',
-  color: 'var(--text-primary)',
-  fontSize: '0.875rem',
-  transition: 'color 0.3s ease'
-};
-
-const inputStyle = {
-  padding: '0.75rem 1rem',
-  border: '2px solid var(--border-color)',
-  borderRadius: '0.5rem',
-  fontSize: '1rem',
-  width: '100%',
-  backgroundColor: 'var(--bg-primary)',
-  color: 'var(--text-primary)',
-  transition: 'all 0.2s ease',
-  outline: 'none'
-};
-
-const inputFocusStyle = {
-  borderColor: 'var(--primary-blue-light)',
-  boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.1)'
-};
-
-const submitButtonStyle = {
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  gap: '0.5rem',
-  padding: '1rem',
-  backgroundColor: 'var(--primary-blue)',
-  color: 'white',
-  border: 'none',
-  borderRadius: '0.5rem',
-  fontSize: '1rem',
-  fontWeight: '600',
-  cursor: 'pointer',
-  transition: 'all 0.2s ease',
-  marginTop: '0.5rem',
-  boxShadow: 'var(--shadow-sm)'
+  gap: '1.5rem',
+  marginBottom: '2rem'
 };
 
 const infoBoxStyle = {
-  marginTop: '2rem',
-  padding: '1rem',
   backgroundColor: 'var(--bg-hover)',
   borderRadius: '0.5rem',
-  borderLeft: '4px solid var(--primary-blue-light)',
+  padding: '1rem',
+  marginTop: '1.5rem',
+  border: '1px solid var(--border-color)',
   transition: 'all 0.3s ease'
 };
 
@@ -248,16 +172,19 @@ const infoTitleStyle = {
   fontSize: '0.875rem',
   fontWeight: '600',
   color: 'var(--text-primary)',
-  marginBottom: '0.5rem',
+  marginBottom: '0.75rem',
   transition: 'color 0.3s ease'
 };
 
 const infoListStyle = {
-  fontSize: '0.75rem',
+  fontSize: '0.8125rem',
   color: 'var(--text-secondary)',
-  paddingLeft: '1.25rem',
+  listStyleType: 'none',
+  padding: 0,
   margin: 0,
-  lineHeight: '1.75',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '0.5rem',
   transition: 'color 0.3s ease'
 };
 
