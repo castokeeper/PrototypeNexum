@@ -29,6 +29,7 @@ enum RolUsuario {
   admin
   director
   control_escolar
+  aspirante
 }
 
 enum TurnoEnum {
@@ -76,30 +77,55 @@ enum EstatusAlumno {
   baja_definitiva
 }
 
+enum EstatusUsuario {
+  en_revision
+  pendiente_formulario
+  pendiente_pago
+  activo
+  rechazado
+  suspendido
+  egresado
+}
+
+enum EstatusPago {
+  pendiente
+  procesando
+  pagado
+  fallido
+  reembolsado
+}
+
 // ============================================
 // MODELOS
 // ============================================
 
 model Usuario {
-  id           Int        @id @default(autoincrement())
-  username     String     @unique @db.VarChar(50)
-  passwordHash String     @map("password_hash") @db.VarChar(255)
-  nombre       String     @db.VarChar(100)
-  email        String?    @unique @db.VarChar(100)
-  rol          RolUsuario @default(control_escolar)
-  activo       Boolean    @default(true)
-  ultimoAcceso DateTime?  @map("ultimo_acceso") @db.Timestamp()
-  createdAt    DateTime   @default(now()) @map("created_at") @db.Timestamp()
-  updatedAt    DateTime   @updatedAt @map("updated_at") @db.Timestamp()
+  id           Int             @id @default(autoincrement())
+  username     String          @unique @db.VarChar(50)
+  passwordHash String          @map("password_hash") @db.VarChar(255)
+  nombre       String          @db.VarChar(100)
+  email        String?         @unique @db.VarChar(100)
+  rol          RolUsuario      @default(aspirante)
+  activo       Boolean         @default(true)
+  temporal     Boolean         @default(true)
+  estatus      EstatusUsuario  @default(en_revision)
+  ultimoAcceso DateTime?       @map("ultimo_acceso") @db.Timestamp()
+  fechaRechazo DateTime?       @map("fecha_rechazo") @db.Timestamp()
+  createdAt    DateTime        @default(now()) @map("created_at") @db.Timestamp()
+  updatedAt    DateTime        @updatedAt @map("updated_at") @db.Timestamp()
 
   // Relaciones
-  solicitudesAprobadas  Solicitud[] @relation("AprobadoPor")
-  solicitudesRechazadas Solicitud[] @relation("RechazadoPor")
+  solicitudesAprobadas  Solicitud[]   @relation("AprobadoPor")
+  solicitudesRechazadas Solicitud[]   @relation("RechazadoPor")
   auditorias            Auditoria[]
+  fichaExamen           FichaExamen?  @relation("UsuarioFicha")
+  solicitudes           Solicitud[]   @relation("UsuarioSolicitudes")
+  pagos                 Pago[]
 
   @@index([username])
-  @@index([rol])
-  @@index([activo])
+  @@index([email])
+  @@index([estatus])
+  @@index([temporal])
   @@map("usuarios")
 }
 
@@ -151,10 +177,16 @@ model Alumno {
 
 model Solicitud {
   id        Int              @id @default(autoincrement())
-  alumnoId  Int              @map("alumno_id")
+  usuarioId Int?             @map("usuario_id")
+  alumnoId  Int?             @map("alumno_id")
   carreraId Int              @map("carrera_id")
   tipo      TipoSolicitud
   estatus   EstatusSolicitud @default(pendiente)
+
+  // Datos del formulario de inscripción (JSON)
+  datosPersonales Json? @map("datos_personales") @db.JsonB
+  datosAcademicos Json? @map("datos_academicos") @db.JsonB
+  datosTutor      Json? @map("datos_tutor") @db.JsonB
 
   // Datos específicos de reinscripción
   matricula String? @db.VarChar(20)
@@ -163,6 +195,12 @@ model Solicitud {
 
   // Datos comunes
   turno TurnoEnum
+
+  // Pago
+  estatusPago     EstatusPago @default(pendiente) @map("estatus_pago")
+  montoPagar      Decimal?    @map("monto_pagar") @db.Decimal(10, 2)
+  stripeSessionId String?     @unique @map("stripe_session_id") @db.VarChar(255)
+  fechaPago       DateTime?   @map("fecha_pago") @db.Timestamp()
 
   // Fechas y seguimiento
   fechaSolicitud     DateTime  @default(now()) @map("fecha_solicitud") @db.Timestamp()
@@ -176,16 +214,20 @@ model Solicitud {
   comentarios String? @db.Text
 
   // Relaciones
-  alumno     Alumno      @relation(fields: [alumnoId], references: [id], onDelete: Cascade)
+  usuario    Usuario?    @relation("UsuarioSolicitudes", fields: [usuarioId], references: [id], onDelete: Cascade)
+  alumno     Alumno?     @relation(fields: [alumnoId], references: [id], onDelete: Cascade)
   carrera    Carrera     @relation(fields: [carreraId], references: [id])
   aprobador  Usuario?    @relation("AprobadoPor", fields: [aprobadoPor], references: [id])
   rechazador Usuario?    @relation("RechazadoPor", fields: [rechazadoPor], references: [id])
   documentos Documento[]
+  pagos      Pago[]
 
+  @@index([usuarioId])
   @@index([alumnoId])
   @@index([carreraId])
   @@index([tipo])
   @@index([estatus])
+  @@index([estatusPago])
   @@index([fechaSolicitud(sort: Desc)])
   @@index([matricula])
   @@index([aprobadoPor])
@@ -264,12 +306,16 @@ model FichaExamen {
   calificacion Float?       @db.Real
   aprobado     Boolean?
 
+  // Usuario asociado (creado al registrarse)
+  usuarioId Int? @unique @map("usuario_id")
+
   // Fechas
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamp()
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamp()
 
   // Relaciones
   carrera     Carrera      @relation(fields: [carreraId], references: [id])
+  usuario     Usuario?     @relation("UsuarioFicha", fields: [usuarioId], references: [id], onDelete: Cascade)
   listaEspera ListaEspera?
   alumno      Alumno? // Si fue aceptado
 

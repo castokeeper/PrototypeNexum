@@ -47,6 +47,7 @@ import carrerasRoutes from './routes/carreras.routes.js';
 import archivosRoutes from './routes/archivos.routes.js';
 import fichaExamenRoutes from './routes/fichaExamen.routes.js';
 import listaEsperaRoutes from './routes/listaEspera.routes.js';
+import alumnosRoutes from './routes/alumnos.routes.js';
 
 app.use('/api/auth', authRoutes);
 app.use('/api/solicitudes', solicitudesRoutes);
@@ -54,6 +55,7 @@ app.use('/api/carreras', carrerasRoutes);
 app.use('/api/archivos', archivosRoutes);
 app.use('/api/fichas', fichaExamenRoutes);
 app.use('/api/lista-espera', listaEsperaRoutes);
+app.use('/api/alumnos', alumnosRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {

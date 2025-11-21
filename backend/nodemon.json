@@ -1,0 +1,24 @@
+{
+    "watch": [
+        "src"
+    ],
+    "ext": "js,json",
+    "ignore": [
+        "src/**/*.spec.js",
+        "src/**/*.test.js",
+        "node_modules/**"
+    ],
+    "delay": 1000,
+    "env": {
+        "NODE_ENV": "development"
+    },
+    "restartable": "rs",
+    "verbose": true,
+    "execMap": {
+        "js": "node"
+    },
+    "events": {
+        "restart": "echo '🔄 Reiniciando servidor...'"
+    },
+    "signal": "SIGTERM"
+}

@@ -19,6 +19,7 @@ const Login = lazy(() => import('./components/Login'));
 const RegistroFicha = lazy(() => import('./components/RegistroFicha'));
 const ConsultaFicha = lazy(() => import('./components/ConsultaFicha'));
 const AdminListaEspera = lazy(() => import('./components/AdminListaEspera'));
+const AdminAlumnos = lazy(() => import('./components/AdminAlumnos'));
 
 function App() {
   return (
@@ -62,6 +63,14 @@ function App() {
                         element={
                           <ProtectedRoute>
                             <AdminListaEspera />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/admin/alumnos"
+                        element={
+                          <ProtectedRoute>
+                            <AdminAlumnos />
                           </ProtectedRoute>
                         }
                       />

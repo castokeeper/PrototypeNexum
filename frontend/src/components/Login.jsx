@@ -30,13 +30,10 @@ const Login = () => {
     setIsSubmitting(true);
 
     try {
-      // Simular un pequeño delay para mejor UX
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      const result = login(credentials.username, credentials.password);
+      const result = await login(credentials.username, credentials.password);
 
       if (result.success) {
-        toast.success('¡Bienvenido al panel de administración!');
+        toast.success(`¡Bienvenido ${result.usuario.nombre}!`);
         navigate('/admin');
       } else {
         toast.error(result.message);
@@ -104,8 +101,8 @@ const Login = () => {
           <p style={infoTitleStyle}>👤 Usuarios de demostración:</p>
           <ul style={infoListStyle}>
             <li><strong>admin</strong> / admin123 - Administrador</li>
-            <li><strong>director</strong> / dir123 - Director</li>
-            <li><strong>control</strong> / ctrl123 - Control Escolar</li>
+            <li><strong>director</strong> / director123 - Director</li>
+            <li><strong>control</strong> / control123 - Control Escolar</li>
           </ul>
         </div>
       </Card>
