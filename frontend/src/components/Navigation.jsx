@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { UserPlus, RefreshCw, Shield, LogOut, User, CheckCircle, Sun, Moon } from 'lucide-react';
+import { UserPlus, RefreshCw, Shield, LogOut, User, CheckCircle, Sun, Moon, FileText, Search, Users } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { toast } from 'react-toastify';
@@ -44,7 +44,18 @@ const Navigation = () => {
             <RefreshCw size={20} />
             <span>Reinscripción</span>
           </Link>
-          <Link to="/aceptados" style={{...linkStyle, backgroundColor: 'var(--success-green)'}}>
+
+          {/* Nuevos links para fichas de examen */}
+          <Link to="/registro-ficha" style={{ ...linkStyle, backgroundColor: '#8b5cf6' }}>
+            <FileText size={20} />
+            <span>Registro Examen</span>
+          </Link>
+          <Link to="/consulta-ficha" style={{ ...linkStyle, backgroundColor: '#06b6d4' }}>
+            <Search size={20} />
+            <span>Consultar Ficha</span>
+          </Link>
+
+          <Link to="/aceptados" style={{ ...linkStyle, backgroundColor: 'var(--success-green)' }}>
             <CheckCircle size={20} />
             <span>Aceptados</span>
           </Link>
@@ -53,6 +64,10 @@ const Navigation = () => {
               <Link to="/admin" style={linkStyle}>
                 <Shield size={20} />
                 <span>Administración</span>
+              </Link>
+              <Link to="/admin/lista-espera" style={{ ...linkStyle, backgroundColor: '#f59e0b' }}>
+                <Users size={20} />
+                <span>Lista Espera</span>
               </Link>
               <div style={userInfoStyle}>
                 <User size={18} />
@@ -64,7 +79,7 @@ const Navigation = () => {
               </button>
             </>
           ) : (
-            <Link to="/login" style={{...linkStyle, backgroundColor: 'var(--warning-orange)'}}>
+            <Link to="/login" style={{ ...linkStyle, backgroundColor: 'var(--warning-orange)' }}>
               <Shield size={20} />
               <span>Admin</span>
             </Link>

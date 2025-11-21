@@ -16,6 +16,9 @@ const Reinscripcion = lazy(() => import('./components/Reinscripcion'));
 const AdminPanel = lazy(() => import('./components/AdminPanel'));
 const AlumnosAceptados = lazy(() => import('./components/AlumnosAceptados'));
 const Login = lazy(() => import('./components/Login'));
+const RegistroFicha = lazy(() => import('./components/RegistroFicha'));
+const ConsultaFicha = lazy(() => import('./components/ConsultaFicha'));
+const AdminListaEspera = lazy(() => import('./components/AdminListaEspera'));
 
 function App() {
   return (
@@ -40,11 +43,25 @@ function App() {
                       <Route path="/reinscripcion" element={<Reinscripcion />} />
                       <Route path="/aceptados" element={<AlumnosAceptados />} />
                       <Route path="/login" element={<Login />} />
+
+                      {/* Rutas públicas para fichas de examen */}
+                      <Route path="/registro-ficha" element={<RegistroFicha />} />
+                      <Route path="/consulta-ficha" element={<ConsultaFicha />} />
+
+                      {/* Rutas protegidas de admin */}
                       <Route
                         path="/admin"
                         element={
                           <ProtectedRoute>
                             <AdminPanel />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/admin/lista-espera"
+                        element={
+                          <ProtectedRoute>
+                            <AdminListaEspera />
                           </ProtectedRoute>
                         }
                       />

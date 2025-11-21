@@ -1,295 +1,473 @@
 # Sistema de Reinscripciones
 
-Sistema web optimizado para gestionar el proceso de inscripción y reinscripción de alumnos con panel administrativo protegido por autenticación y base de datos persistente.
+Sistema web completo con frontend (React + Vite) y backend (Express + Prisma + PostgreSQL) para gestionar el proceso de inscripción y reinscripción de alumnos con panel administrativo.
 
-## 🚀 Características Principales
+## 🏗️ Arquitectura Monorepo
 
-### 1. Panel de Alumno de Nuevo Ingreso
-- Formulario de registro con datos personales del alumno
-- **Validaciones robustas** (email, CURP, teléfono, archivos)
-- Carga de comprobante de pago con validación de tipo y tamaño
-- Feedback visual de errores en tiempo real
-- **Almacenamiento persistente en base de datos local**
-
-### 2. Panel de Reinscripción
-- Formulario para alumnos que se reinscriben
-- Validación completa de matrícula y datos académicos
-- Carga de comprobante de pago
-- **Almacenamiento persistente en base de datos local**
-
-### 3. Panel de Administración (Protegido) 🔒
-- **Requiere autenticación de usuario autorizado**
-- Visualización de todas las solicitudes (nuevo ingreso y reinscripciones)
-- Vista previa de comprobantes de pago
-- Verificación visual de datos
-- Botones para aprobar o rechazar solicitudes
-- Filtros por tipo de solicitud y estatus
-- **Actualización optimizada de estado** (sin recargas innecesarias)
-- Solo accesible por usuarios autorizados
-
-### 4. Apartado de Alumnos Aceptados ⭐
-- Lista completa de todos los alumnos cuyas solicitudes fueron aprobadas
-- Visualización organizada con tarjetas informativas
-- Filtrado por tipo (nuevo ingreso/reinscripción)
-- **Datos persistentes almacenados en base de datos**
-
-### 5. Sistema de Autenticación 🔐
-- Login seguro con **variables de entorno**
-- Sesión persistente (se mantiene al recargar la página)
-- Protección de rutas - redirige al login si no está autenticado
-- Múltiples usuarios con diferentes niveles de acceso
-- **Credenciales configurables** (no hardcodeadas en producción)
-
-### 6. Base de Datos Local (IndexedDB) 💾
-- **Almacenamiento persistente** de todas las solicitudes
-- **Los datos NO se pierden** al recargar la página o cerrar el navegador
-- Dos tablas separadas:
-  - `solicitudes`: Todas las solicitudes con sus estados
-  - `aceptados`: Alumnos cuyas solicitudes fueron aprobadas
-
-## ⚡ Optimizaciones Implementadas
-
-### Performance
-- ✅ **Lazy Loading**: Componentes cargados bajo demanda
-- ✅ **Code Splitting**: Bundle optimizado (~38% más pequeño)
-- ✅ **Memoización**: Reducción de re-renders innecesarios
-- ✅ **Gestión de estado optimizada**: Actualizaciones locales sin recargas
-
-### Arquitectura
-- ✅ **Componentes reutilizables**: Button, Card, Input, Modal, Loading
-- ✅ **Custom Hooks**: useForm, useFileUpload
-- ✅ **Utilidades centralizadas**: validators, formatters, constants
-- ✅ **CSS Modules**: Estilos encapsulados y sin duplicación
-- ✅ **Error Boundaries**: Manejo robusto de errores
-
-### Seguridad
-- ✅ **Variables de entorno**: Credenciales no hardcodeadas
-- ✅ **Validaciones robustas**: Email, CURP, teléfono, archivos
-- ✅ **Sanitización de inputs**: Prevención de inyecciones
-- ✅ **Protección de rutas**: Control de acceso por autenticación
-
-### UX/UI
-- ✅ **Loading states**: Feedback visual durante cargas
-- ✅ **Error handling**: Mensajes de error claros y útiles
-- ✅ **Accesibilidad**: ARIA labels, navegación por teclado
-- ✅ **Tema claro/oscuro**: Persistente y animado
-- Operaciones asíncronas para mejor rendimiento
-- Sistema de índices para búsquedas rápidas
-
-## 📦 Tecnologías Utilizadas
-
-- **React 19** - Framework principal con Suspense y lazy loading
-- **Vite** - Build tool ultra-rápido
-- **React Router DOM v7** - Navegación y rutas protegidas
-- **Lucide React** - Sistema de iconos moderno
-- **React Toastify** - Notificaciones elegantes
-- **PropTypes** - Validación de tipos en componentes
-- **Context API** - Gestión de estado global
-- **LocalStorage** - Persistencia de sesión
-- **IndexedDB** - Base de datos local del navegador 💾
-- **CSS Modules** - Estilos encapsulados y optimizados
-
-## 🚀 Instalación y Configuración
-
-### Requisitos previos
-- Node.js >= 18.0.0
-- npm >= 9.0.0
-
-### Pasos de instalación
-
-1. **Clonar el repositorio**
-   ```bash
-   git clone <url-del-repo>
-   cd prototipo
-   ```
-
-2. **Instalar dependencias**
-   ```bash
-   npm install
-   ```
-
-3. **Configurar variables de entorno**
-   ```bash
-   # Copiar el archivo de ejemplo
-   copy .env.example .env.local
-   
-   # Editar .env.local con tus propias credenciales
-   # Formato: username:password:nombre,username:password:nombre
-   ```
-
-4. **Ejecutar en modo desarrollo**
-   ```bash
-   npm run dev
-   ```
-
-5. **Construir para producción**
-   ```bash
-   npm run build
-   npm run preview
-   ```
-
-## 🔧 Scripts Disponibles
-
-```bash
-npm run dev        # Servidor de desarrollo
-npm run build      # Build de producción
-npm run preview    # Preview del build
-npm run lint       # Ejecutar ESLint
-npm run lint:fix   # Corregir errores de ESLint
-```
-
-## 📁 Estructura del Proyecto
+Proyecto organizado como **monorepo** con frontend y backend completamente separados:
 
 ```
 prototipo/
-├── src/
-│   ├── components/
-│   │   ├── common/              # Componentes reutilizables
-│   │   │   ├── Button/
-│   │   │   ├── Card/
-│   │   │   ├── Input/
-│   │   │   ├── Modal/
-│   │   │   ├── Loading/
-│   │   │   ├── ErrorBoundary.jsx
-│   │   │   └── index.js
-│   │   ├── admin/               # Componentes de administración
-│   │   │   ├── SolicitudCard.jsx
-│   │   │   └── SolicitudDetalle.jsx
-│   │   ├── AdminPanel.jsx
-│   │   ├── AlumnosAceptados.jsx
-│   │   ├── Login.jsx
-│   │   ├── Navigation.jsx
-│   │   ├── NuevoIngreso.jsx
-│   │   ├── ProtectedRoute.jsx
-│   │   └── Reinscripcion.jsx
-│   ├── context/                 # Contextos de React
-│   │   ├── AuthContext.jsx
-│   │   ├── SolicitudesContext.jsx
-│   │   └── ThemeContext.jsx
-│   ├── hooks/                   # Custom hooks
-│   │   ├── useForm.js
-│   │   ├── useFileUpload.js
-│   │   └── index.js
-│   ├── services/                # Servicios externos
-│   │   └── database.js
-│   ├── utils/                   # Utilidades
-│   │   ├── constants.js
-│   │   ├── validators.js
-│   │   ├── formatters.js
-│   │   └── index.js
-│   ├── App.jsx
-│   ├── main.jsx
-│   └── index.css
-├── public/
-│   └── vite.svg
-├── .env.example                 # Ejemplo de variables de entorno
-├── .env.local                   # Variables de entorno (no versionar)
-├── .gitignore
-├── CHANGELOG.md                 # Historial de cambios y refactorización
-├── OPTIMIZACIONES.md            # Detalles técnicos de optimizaciones
-├── package.json
-├── vite.config.js
-└── README.md
+├── frontend/              # React + Vite (puerto 5173)
+│   ├── src/
+│   ├── public/
+│   ├── package.json
+│   ├── vite.config.js    # Proxy configurado
+│   └── README.md
+├── backend/               # Express + Prisma (puerto 3000)
+│   ├── src/
+│   ├── prisma/
+│   ├── package.json
+│   ├── SETUP.md          # Guía de configuración
+│   ├── AZURE-SETUP.md    # Guía Azure PostgreSQL
+│   └── SECURITY-AUDIT.md # Reporte de seguridad
+├── package.json           # Scripts coordinados
+├── MIGRATION.md           # Guía de cambios
+└── PAYMENT-SYSTEMS.md     # Sistemas de pago
 ```
 
-## 🔐 Credenciales de Acceso
+### Beneficios
 
-**Usuarios de demostración para el panel administrativo:**
-
-| Usuario   | Contraseña | Rol              |
-|-----------|------------|------------------|
-| admin     | admin123   | Administrador    |
-| director  | dir123     | Director         |
-| control   | ctrl123    | Control Escolar  |
-
-> **⚠️ Nota de Seguridad:** 
-> - En producción, usar variables de entorno con contraseñas hasheadas
-> - Implementar backend con autenticación JWT o similar
-> - Las credenciales actuales son solo para desarrollo
-
-## 💡 Uso del Sistema
-
-1. Los alumnos de nuevo ingreso acceden al panel correspondiente y llenan sus datos
-2. Los datos se **guardan automáticamente** en la base de datos local
-3. Los alumnos que se reinscriben acceden a su panel específico
-4. Los administradores deben **iniciar sesión** con credenciales válidas
-5. Solo usuarios autenticados pueden acceder al panel de administración
-6. Los administradores revisan las solicitudes y comprobantes
-7. Los administradores aprueban o rechazan cada solicitud
-8. **Los alumnos aprobados se mueven automáticamente al apartado de "Aceptados"**
-9. Cualquier persona puede ver la lista de alumnos aceptados en `/aceptados`
-
-## 🔄 Flujo de Datos
-
-```
-┌─────────────────────┐
-│  Alumno envía       │
-│  solicitud          │
-└──────────┬──────────┘
-           │
-           ▼
-┌─────────────────────┐
-│  Se guarda en       │
-│  IndexedDB          │
-│  (tabla solicitudes)│
-└──────────┬──────────┘
-           │
-           ▼
-┌─────────────────────┐
-│  Admin revisa       │
-│  y aprueba          │
-└──────────┬──────────┘
-           │
-           ▼
-┌─────────────────────┐
-│  Se copia a tabla   │
-│  "aceptados"        │
-│  Visible en /aceptados
-└─────────────────────┘
-```
-
-## 📊 Características de la Base de Datos
-
-### Persistencia
-- ✅ **Los datos se mantienen** incluso después de cerrar el navegador
-- ✅ **No se pierden** al recargar la página
-- ✅ Almacenamiento local en el dispositivo del usuario
-- ✅ No requiere conexión a internet una vez cargada la aplicación
-
-### Tablas
-1. **solicitudes**: Todas las solicitudes con sus estados (pendiente/aprobada/rechazada)
-2. **aceptados**: Solo los alumnos cuyas solicitudes fueron aprobadas
-
-### Ventajas de IndexedDB
-✅ **Sin servidor necesario** para desarrollo  
-✅ **Persistencia real** de datos  
-✅ **Rápido y eficiente**  
-✅ **Almacenamiento ilimitado** (según disponibilidad del navegador)  
-✅ **Operaciones asíncronas** (no bloquea la UI)  
-✅ **Soporte de índices** para búsquedas rápidas  
-✅ **Compatible** con todos los navegadores modernos  
-
-## 🚀 Migración a Producción
-
-Para un entorno de producción real, se recomienda:
-
-1. Implementar un backend con Node.js/Express, Django, Laravel, etc.
-2. Usar una base de datos relacional (MySQL, PostgreSQL) o NoSQL (MongoDB)
-3. Implementar autenticación con JWT
-4. Agregar validación del lado del servidor
-5. Implementar subida de archivos a un servidor/cloud storage
-6. Añadir encriptación de datos sensibles
-7. Implementar logs de auditoría
-
-## 📚 Documentación Adicional
-
-- **CHANGELOG.md** - Historial completo de cambios y refactorización
-- **OPTIMIZACIONES.md** - Detalles técnicos de las optimizaciones implementadas
-- **LIMPIEZA.md** - Resumen de archivos eliminados y limpieza del proyecto
+✅ **Sin conflictos de dependencias** - Frontend y backend independientes  
+✅ **Desarrollo paralelo** - Equipos pueden trabajar sin interferir  
+✅ **Deploy independiente** - Frontend y backend en diferentes hosts  
+✅ **Mejor organización** - Código claramente separado  
+✅ **Escalabilidad** - Fácil de escalar cada parte
 
 ---
 
-**Versión:** 2.0.0  
-**Estado:** ✅ Production Ready  
-**Última actualización:** 2025-11-04
+## 🚀 Inicio Rápido
 
+### Instalación Completa
+
+```bash
+# Clonar repositorio
+git clone <url-del-repo>
+cd prototipo
+
+# Instalar TODAS las dependencias
+npm run install:all
+```
+
+### Configurar Backend
+
+1. **Configurar Base de Datos** (elige una opción):
+
+   **Opción A: PostgreSQL Local**
+   ```bash
+   # Instalar PostgreSQL
+   # Crear base de datos "reinscripciones"
+   ```
+
+   **Opción B: Azure Database for PostgreSQL** (Recomendado)
+   ```bash
+   # Ver guía completa en backend/AZURE-SETUP.md
+   # Crear servidor en Azure Portal
+   # Configurar firewall
+   ```
+
+2. **Configurar Variables de Entorno**:
+   ```bash
+   cd backend
+   
+   # Copiar template
+   cp .env.example .env
+   
+   # Editar .env con tus credenciales
+   # DATABASE_URL=postgresql://user:pass@host:5432/dbname?sslmode=require
+   ```
+
+3. **Ejecutar Migraciones**:
+   ```bash
+   # Generar Prisma Client
+   npm run prisma:generate
+   
+   # Crear tablas
+   npm run prisma:migrate
+   
+   # Poblar datos iniciales
+   npm run prisma:seed
+   ```
+
+### Configurar Frontend
+
+```bash
+cd frontend
+
+# Copiar template (opcional)
+cp .env.example .env.local
+
+# Ya configurado con proxy a localhost:3000
+```
+
+### Iniciar Sistema
+
+```bash
+# Desde la raíz - Inicia frontend Y backend
+npm run dev
+
+# O por separado:
+npm run dev:frontend  # Solo frontend (puerto 5173)
+npm run dev:backend   # Solo backend (puerto 3000)
+```
+
+---
+
+## 🎯 Características
+
+### Frontend
+- ✅ Panel de nuevo ingreso y reinscripción
+- ✅ Validaciones robustas (CURP, email, teléfono)
+- ✅ Panel administrativo con autenticación
+- ✅ Vista de alumnos aceptados
+- ✅ Sistema de tema claro/oscuro
+- ✅ Interfaz responsive y moderna
+- ✅ Notificaciones toast
+- ✅ Enrutamiento con React Router v7
+
+### Backend
+- ✅ API REST con endpoints seguros
+- ✅ Autenticación JWT con bcrypt
+- ✅ Base de datos PostgreSQL con Prisma ORM
+- ✅ Validación de datos (express-validator)
+- ✅ Rate limiting y seguridad (Helmet)
+- ✅ Upload de archivos (Multer + Sharp)
+- ✅ Sistema de auditoría
+- ✅ Soporte para Azure PostgreSQL
+- ✅ SSL/TLS configurado
+
+---
+
+## 📦 Tecnologías
+
+### Frontend
+| Tecnología | Versión | Uso |
+|------------|---------|-----|
+| React | 19.1.1 | UI Framework |
+| Vite | 6.0.11 | Build Tool |
+| React Router | 7.9.4 | Enrutamiento |
+| Lucide React | 0.546.0 | Iconos |
+| React Toastify | 11.0.5 | Notificaciones |
+
+### Backend
+| Tecnología | Versión | Uso |
+|------------|---------|-----|
+| Express.js | 4.18.2 | Web Framework |
+| Prisma | 6.19.0 | ORM |
+| PostgreSQL | 15+ | Base de Datos |
+| JWT | 9.0.2 | Autenticación |
+| bcrypt | 5.1.1 | Hash de passwords |
+| Helmet | 7.1.0 | Seguridad |
+| Multer | 1.4.5 | Subida de archivos |
+| Sharp | 0.33.1 | Procesamiento imágenes |
+
+---
+
+## 📚 Comandos Disponibles
+
+### Desarrollo
+
+```bash
+# Sistema completo
+npm run dev              # Frontend + Backend simultáneamente
+
+# Componentes individuales
+npm run dev:frontend     # Solo frontend (puerto 5173)
+npm run dev:backend      # Solo backend (puerto 3000)
+```
+
+### Base de Datos
+
+```bash
+cd backend
+
+npm run prisma:generate  # Generar Prisma Client
+npm run prisma:migrate   # Ejecutar migraciones
+npm run prisma:seed      # Poblar datos iniciales
+npm run prisma:studio    # Abrir Prisma Studio (GUI)
+```
+
+### Build
+
+```bash
+npm run build            # Build de ambos
+npm run build:frontend   # Build solo frontend
+```
+
+### Mantenimiento
+
+```bash
+npm run install:all      # Instalar todas las dependencias
+npm run lint            # Lint de ambos proyectos
+npm run lint:frontend   # Lint solo frontend
+npm run lint:backend    # Lint solo backend (si configurado)
+```
+
+---
+
+## 🔐 Configuración
+
+### Variables de Entorno
+
+#### Backend (`backend/.env`)
+```env
+# Database (Azure o local)
+DATABASE_URL="postgresql://user:pass@host:5432/dbname?sslmode=require"
+
+# JWT
+JWT_SECRET="tu-secret-key-cambiar-en-produccion"
+JWT_EXPIRES_IN="7d"
+
+# Server
+PORT=3000
+NODE_ENV=development
+
+# CORS
+FRONTEND_URL="http://localhost:5173"
+```
+
+**Ejemplos de DATABASE_URL**:
+- **Azure**: `postgresql://user:pass@servidor.postgres.database.azure.com:5432/reinscripciones?sslmode=require`
+- **Local**: `postgresql://postgres:password@localhost:5432/reinscripciones`
+- **Neon**: `postgresql://user:pass@ep-xxx.region.neon.tech/dbname?sslmode=require`
+
+#### Frontend (`frontend/.env.local`)
+```env
+VITE_API_URL=http://localhost:5173
+VITE_APP_NAME=Sistema de Reinscripciones
+```
+
+---
+
+## 🗄️ Base de Datos
+
+### Schema Principal
+
+| Tabla | Descripción |
+|-------|-------------|
+| `usuarios` | Usuarios administrativos (admin, director, control_escolar) |
+| `alumnos` | Datos de alumnos |
+| `solicitudes` | Solicitudes de inscripción/reinscripción |
+| `carreras` | Catálogo de carreras |
+| `documentos` | Archivos adjuntos |
+| `auditoria` | Registro de cambios |
+
+Ver detalles completos en [`DATABASE-SCHEMA.md`](./DATABASE-SCHEMA.md)
+
+### Usuarios por Defecto
+
+Después de ejecutar `npm run prisma:seed`:
+
+| Usuario | Contraseña | Rol |
+|---------|------------|-----|
+| admin | admin123 | Administrador |
+| director | director123 | Director |
+| control | control123 | Control Escolar |
+
+⚠️ **Cambiar en producción**
+
+---
+
+## 💳 Sistema de Pagos
+
+Se documentaron 5 opciones de pago optimizadas para México:
+
+| Proveedor | Desarrollo | Producción | Comisión |
+|-----------|------------|------------|----------|
+| **Stripe** | ⭐⭐⭐ | ✅ | 3.6% + $3 |
+| **Conekta** | ✅ | ⭐⭐⭐ | 3.5% + $3 |
+| **Mercado Pago** | ✅ | ✅ | 3.99% + IVA |
+| **PayPal** | ✅ | ✅ | 4.4% + fija |
+| **OpenPay** | ✅ | ⭐⭐ | 2.9% + $2.5 |
+
+Ver guía completa con ejemplos de código en [`PAYMENT-SYSTEMS.md`](./PAYMENT-SYSTEMS.md)
+
+**Recomendación**:
+- **Desarrollo**: Stripe (mejor documentación y testing)
+- **Producción México**: Conekta (OXXO + SPEI)
+
+---
+
+## 🔒 Seguridad
+
+### Implementado
+
+- ✅ JWT para autenticación
+- ✅ bcrypt para hash de passwords
+- ✅ Helmet.js para headers de seguridad
+- ✅ CORS configurado
+- ✅ Rate limiting (100 req/15min)
+- ✅ Validación de entrada
+- ✅ SSL/TLS con Azure
+
+### Auditoría
+
+Ver reporte completo en [`backend/SECURITY-AUDIT.md`](./backend/SECURITY-AUDIT.md)
+
+**Estado actual**: 
+- ⚠️ 3 vulnerabilidades en dependencias de desarrollo (no producción)
+- ✅ Sistema seguro en producción
+
+---
+
+## 📖 Documentación
+
+| Documento | Descripción |
+|-----------|-------------|
+| [`README.md`](./README.md) | Este archivo |
+| [`MIGRATION.md`](./MIGRATION.md) | Guía de cambios de estructura |
+| [`PAYMENT-SYSTEMS.md`](./PAYMENT-SYSTEMS.md) | Opciones de sistemas de pago |
+| [`DATABASE-SCHEMA.md`](./DATABASE-SCHEMA.md) | Schema completo de la BD |
+| [`backend/SETUP.md`](./backend/SETUP.md) | Configuración del backend |
+| [`backend/AZURE-SETUP.md`](./backend/AZURE-SETUP.md) | Guía de Azure PostgreSQL |
+| [`backend/AZURE-CHECKLIST.md`](./backend/AZURE-CHECKLIST.md) | Checklist de Azure |
+| [`backend/SECURITY-AUDIT.md`](./backend/SECURITY-AUDIT.md) | Reporte de seguridad |
+| [`frontend/README.md`](./frontend/README.md) | Documentación del frontend |
+
+---
+
+## 🚢 Deployment
+
+### Frontend (Recomendaciones)
+
+- **Vercel** (Recomendado): Deploy automático desde GitHub
+- **Netlify**: Alternativa con CI/CD
+- **GitHub Pages**: Para sitios estáticos
+
+```bash
+cd frontend
+npm run build
+# Subir carpeta dist/
+```
+
+### Backend (Recomendaciones)
+
+- **Railway**: Simple y con PostgreSQL incluido
+- **Render**: Free tier disponible
+- **Azure App Service**: Integrado con Azure PostgreSQL
+- **Heroku**: Clásico (requiere plan de pago)
+
+**Variables de entorno requeridas**:
+- `DATABASE_URL`
+- `JWT_SECRET`
+- `FRONTEND_URL`
+
+### Base de Datos
+
+- **Azure Database for PostgreSQL**: Recomendado ($12-15/mes)
+- **Neon**: Free tier disponible
+- **Supabase**: Alternativa gratuita
+- **Railway**: Incluido con el backend
+
+---
+
+## 🛠️ Desarrollo
+
+### Estructura de Código
+
+#### Frontend
+```
+frontend/src/
+├── components/       # Componentes reutilizables
+├── pages/           # Páginas principales
+├── context/         # Context API
+├── hooks/           # Custom hooks
+├── services/        # API services
+└── utils/           # Utilidades
+```
+
+#### Backend
+```
+backend/src/
+├── config/          # Configuraciones
+├── controllers/     # Lógica de negocio
+├── middlewares/     # Middlewares
+├── routes/          # Rutas de la API
+└── utils/           # Utilidades
+```
+
+### Agregar Nuevas Dependencias
+
+```bash
+# Frontend
+cd frontend
+npm install nombre-paquete
+
+# Backend
+cd backend
+npm install nombre-paquete
+```
+
+---
+
+## 🐛 Solución de Problemas
+
+### Backend no inicia
+
+1. Verificar que PostgreSQL esté corriendo
+2. Verificar credenciales en `.env`
+3. Ejecutar `npm run prisma:generate`
+
+### Frontend no conecta al backend
+
+1. Verificar que backend esté en puerto 3000
+2. Verificar proxy en `frontend/vite.config.js`
+3. Verificar CORS en backend
+
+### Error de Prisma
+
+```bash
+cd backend
+npx prisma generate
+npx prisma migrate dev
+```
+
+### Problemas con Azure
+
+Ver sección "Solución de Problemas" en [`backend/AZURE-SETUP.md`](./backend/AZURE-SETUP.md)
+
+---
+
+## 📊 Estado del Proyecto
+
+- ✅ Arquitectura monorepo implementada
+- ✅ Frontend operacional
+- ✅ Backend operacional  
+- ✅ Azure PostgreSQL configurado
+- ✅ Migraciones ejecutadas
+- ✅ Documentación completa
+- ✅ Sistema de pagos documentado
+- ⚠️ Pendiente: Implementación de pagos
+- ⚠️ Pendiente: Tests automatizados
+
+---
+
+## 👥 Contribuir
+
+1. Fork el proyecto
+2. Crear rama feature (`git checkout -b feature/AmazingFeature`)
+3. Commit cambios (`git commit -m 'Add: Amazing Feature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
+5. Abrir Pull Request
+
+---
+
+## 📝 Licencia
+
+Este proyecto está bajo la Licencia MIT.
+
+---
+
+## 🆘 Soporte
+
+¿Problemas o preguntas?
+
+1. Revisar la documentación en `/backend` y `/frontend`
+2. Revisar [`MIGRATION.md`](./MIGRATION.md) para cambios recientes
+3. Revisar issues en el repositorio
+
+---
+
+**Última actualización**: 2025-11-21  
+**Versión**: 1.0.0  
+**Estado**: ✅ Operacional
