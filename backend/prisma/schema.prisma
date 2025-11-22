@@ -350,3 +350,36 @@ model ListaEspera {
   @@index([fechaIngreso(sort: Desc)])
   @@map("lista_espera")
 }
+
+model Pago {
+  id              Int      @id @default(autoincrement())
+  solicitudId     Int      @map("solicitud_id")
+  usuarioId       Int      @map("usuario_id")
+  
+  // Montos
+  monto           Decimal  @db.Decimal(10, 2)
+  moneda          String   @default("MXN") @db.VarChar(3)
+  
+  // Stripe
+  stripePaymentId String   @unique @map("stripe_payment_id") @db.VarChar(255)
+  stripeStatus    String   @map("stripe_status") @db.VarChar(50)
+  
+  // Metadata
+  concepto        String   @db.VarChar(100)
+  metodoPago      String?  @map("metodo_pago") @db.VarChar(50)
+  descripcion     String?  @db.Text
+  
+  // Fechas
+  fechaPago       DateTime @default(now()) @map("fecha_pago") @db.Timestamp()
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamp()
+  
+  // Relaciones
+  solicitud Solicitud @relation(fields: [solicitudId], references: [id], onDelete: Cascade)
+  usuario   Usuario   @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  
+  @@index([solicitudId])
+  @@index([usuarioId])
+  @@index([stripePaymentId])
+  @@index([fechaPago(sort: Desc)])
+  @@map("pagos")
+}

@@ -61,20 +61,30 @@ export const obtenerListaEspera = async (req, res) => {
 };
 
 /**
- * Aceptar aspirante y crear alumno
+ * Aceptar aspirante
  * POST /api/lista-espera/:id/aceptar
+ * 
+ * FLUJO:
+ * 1. Cambiar estatus de Usuario a 'pendiente_formulario'
+ * 2. Actualizar ListaEspera a 'aceptado'
+ * 3. Actualizar FichaExamen a 'aprobado'
+ * 
+ * El aspirante ahora puede llenar el formulario de inscripción
+ * El alumno se creará DESPUÉS del pago exitoso
  */
 export const aceptarAspirante = async (req, res) => {
     try {
         const { id } = req.params;
         const { observaciones } = req.body;
 
+        // Obtener item de lista de espera con ficha y usuario
         const itemEspera = await prisma.listaEspera.findUnique({
             where: { id: parseInt(id) },
             include: {
                 ficha: {
                     include: {
-                        carrera: true
+                        carrera: true,
+                        usuario: true  // ⭐ Incluir usuario
                     }
                 }
             }
@@ -86,46 +96,31 @@ export const aceptarAspirante = async (req, res) => {
             });
         }
 
+        if (itemEspera.estadoActual !== 'en_espera') {
+            return res.status(400).json({
+                error: `Este aspirante ya fue ${itemEspera.estadoActual}`
+            });
+        }
+
         const ficha = itemEspera.ficha;
 
-        // Verificar que el aspirante aprobó el examen
-        if (!ficha.aprobado) {
+        if (!ficha.usuario) {
             return res.status(400).json({
-                error: 'El aspirante no ha aprobado el examen'
+                error: 'Esta ficha no tiene un usuario asociado'
             });
         }
 
-        // Verificar si ya existe un alumno con este CURP
-        const alumnoExistente = await prisma.alumno.findUnique({
-            where: { curp: ficha.curp }
-        });
-
-        if (alumnoExistente) {
-            return res.status(400).json({
-                error: 'Ya existe un alumno registrado con este CURP'
-            });
-        }
-
-        // Crear alumno en una transacción
-        const result = await prisma.$transaction(async (tx) => {
-            // Crear el alumno
-            const nuevoAlumno = await tx.alumno.create({
+        // TRANSACCIÓN: Actualizar todo de forma consistente
+        await prisma.$transaction(async (tx) => {
+            // 1. Actualizar Usuario: ya no está en revisión, puede llenar formulario
+            await tx.usuario.update({
+                where: { id: ficha.usuario.id },
                 data: {
-                    fichaExamenId: ficha.id,
-                    nombre: ficha.nombre,
-                    apellidoPaterno: ficha.apellidoPaterno,
-                    apellidoMaterno: ficha.apellidoMaterno,
-                    curp: ficha.curp,
-                    fechaNacimiento: ficha.fechaNacimiento,
-                    telefono: ficha.telefono,
-                    email: ficha.email,
-                    direccion: ficha.direccion,
-                    semestreActual: 1,
-                    estatusAlumno: 'activo'
+                    estatus: 'pendiente_formulario'  // ⭐ NUEVO ESTATUS
                 }
             });
 
-            // Actualizar lista de espera
+            // 2. Actualizar ListaEspera
             await tx.listaEspera.update({
                 where: { id: parseInt(id) },
                 data: {
@@ -135,26 +130,27 @@ export const aceptarAspirante = async (req, res) => {
                 }
             });
 
-            // Actualizar ficha
+            // 3. Actualizar FichaExamen
             await tx.fichaExamen.update({
                 where: { id: ficha.id },
                 data: {
                     estatus: 'aprobado'
                 }
             });
-
-            return nuevoAlumno;
         });
+
+        // TODO: Enviar email de aceptación
+        // await enviarEmailAceptacion(ficha.email, ficha.usuario.username);
 
         res.json({
             success: true,
-            message: 'Aspirante aceptado y alumno creado exitosamente',
-            alumno: {
-                id: result.id,
-                nombre: `${result.nombre} ${result.apellidoPaterno} ${result.apellidoMaterno}`,
-                curp: result.curp,
-                semestreActual: result.semestreActual,
-                estatus: result.estatusAlumno
+            message: 'Aspirante aceptado. Ahora puede llenar el formulario de inscripción.',
+            aspirante: {
+                nombre: `${ficha.nombre} ${ficha.apellidoPaterno} ${ficha.apellidoMaterno}`,
+                email: ficha.email,
+                folio: ficha.folio,
+                carrera: ficha.carrera.nombre,
+                proximoPaso: 'Llenar formulario de inscripción'
             }
         });
     } catch (error) {
@@ -169,6 +165,15 @@ export const aceptarAspirante = async (req, res) => {
 /**
  * Rechazar aspirante
  * POST /api/lista-espera/:id/rechazar
+ * 
+ * FLUJO:
+ * 1. Marcar Usuario como rechazado (NO eliminar todavía)
+ * 2. Registrar fechaRechazo (para el cron job de 7 días)
+ * 3. Desactivar usuario
+ * 4. Actualizar ListaEspera
+ * 5. Actualizar FichaExamen
+ * 
+ * El usuario se eliminará automáticamente después de 7 días (cron job)
  */
 export const rechazarAspirante = async (req, res) => {
     try {
@@ -178,7 +183,11 @@ export const rechazarAspirante = async (req, res) => {
         const itemEspera = await prisma.listaEspera.findUnique({
             where: { id: parseInt(id) },
             include: {
-                ficha: true
+                ficha: {
+                    include: {
+                        usuario: true
+                    }
+                }
             }
         });
 
@@ -188,9 +197,33 @@ export const rechazarAspirante = async (req, res) => {
             });
         }
 
-        // Actualizar en una transacción
+        if (itemEspera.estadoActual !== 'en_espera') {
+            return res.status(400).json({
+                error: `Este aspirante ya fue ${itemEspera.estadoActual}`
+            });
+        }
+
+        const ficha = itemEspera.ficha;
+
+        if (!ficha.usuario) {
+            return res.status(400).json({
+                error: 'Esta ficha no tiene un usuario asociado'
+            });
+        }
+
+        // TRANSACCIÓN: Marcar como rechazado (no eliminar todavía)
         await prisma.$transaction(async (tx) => {
-            // Actualizar lista de espera
+            // 1. Marcar usuario como rechazado y desactivado
+            await tx.usuario.update({
+                where: { id: ficha.usuario.id },
+                data: {
+                    estatus: 'rechazado',
+                    activo: false,  // No puede hacer login
+                    fechaRechazo: new Date()  // ⭐ Para el cron de 7 días
+                }
+            });
+
+            // 2. Actualizar lista de espera
             await tx.listaEspera.update({
                 where: { id: parseInt(id) },
                 data: {
@@ -200,7 +233,7 @@ export const rechazarAspirante = async (req, res) => {
                 }
             });
 
-            // Actualizar ficha
+            // 3. Actualizar ficha
             await tx.fichaExamen.update({
                 where: { id: itemEspera.fichaId },
                 data: {
@@ -210,14 +243,19 @@ export const rechazarAspirante = async (req, res) => {
             });
         });
 
+        // TODO: Enviar email con el motivo del rechazo
+        // await enviarEmailRechazo(ficha.email, motivo);
+
         res.json({
             success: true,
-            message: 'Aspirante rechazado correctamente'
+            message: 'Aspirante rechazado correctamente',
+            info: 'El usuario será eliminado automáticamente después de 7 días'
         });
     } catch (error) {
         console.error('Error al rechazar aspirante:', error);
         res.status(500).json({
-            error: 'Error al rechazar el aspirante'
+            error: 'Error al rechazar el aspirante',
+            details: process.env.NODE_ENV === 'development' ? error.message : undefined
         });
     }
 };

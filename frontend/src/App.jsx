@@ -20,6 +20,11 @@ const RegistroFicha = lazy(() => import('./components/RegistroFicha'));
 const ConsultaFicha = lazy(() => import('./components/ConsultaFicha'));
 const AdminListaEspera = lazy(() => import('./components/AdminListaEspera'));
 const AdminAlumnos = lazy(() => import('./components/AdminAlumnos'));
+const PortalAspirante = lazy(() => import('./components/PortalAspirante'));
+const FormularioInscripcion = lazy(() => import('./components/FormularioInscripcion'));
+const ProcesoPago = lazy(() => import('./components/ProcesoPago'));
+const PagoExitoso = lazy(() => import('./components/PagoExitoso'));
+const PagoCancelado = lazy(() => import('./components/PagoCancelado'));
 
 function App() {
   return (
@@ -48,6 +53,37 @@ function App() {
                       {/* Rutas públicas para fichas de examen */}
                       <Route path="/registro-ficha" element={<RegistroFicha />} />
                       <Route path="/consulta-ficha" element={<ConsultaFicha />} />
+
+                      {/* Rutas protegidas para aspirantes */}
+                      <Route
+                        path="/portal-aspirante"
+                        element={
+                          <ProtectedRoute>
+                            <PortalAspirante />
+                          </ProtectedRoute>
+                        }
+                      />
+
+                      <Route
+                        path="/portal-aspirante/inscripcion"
+                        element={
+                          <ProtectedRoute>
+                            <FormularioInscripcion />
+                          </ProtectedRoute>
+                        }
+                      />
+
+                      <Route
+                        path="/proceso-pago"
+                        element={
+                          <ProtectedRoute>
+                            <ProcesoPago />
+                          </ProtectedRoute>
+                        }
+                      />
+
+                      <Route path="/pago-exitoso" element={<PagoExitoso />} />
+                      <Route path="/pago-cancelado" element={<PagoCancelado />} />
 
                       {/* Rutas protegidas de admin */}
                       <Route

@@ -5,6 +5,7 @@ import morgan from 'morgan';
 import dotenv from 'dotenv';
 import { errorHandler } from './middlewares/errorHandler.js';
 import { rateLimiter } from './middlewares/rateLimiter.js';
+import { iniciarCronJobs } from './config/cronJobs.js';
 
 // Cargar variables de entorno
 dotenv.config();
@@ -48,6 +49,9 @@ import archivosRoutes from './routes/archivos.routes.js';
 import fichaExamenRoutes from './routes/fichaExamen.routes.js';
 import listaEsperaRoutes from './routes/listaEspera.routes.js';
 import alumnosRoutes from './routes/alumnos.routes.js';
+import aspiranteRoutes from './routes/aspirante.routes.js';
+import pagoRoutes from './routes/pago.routes.js';
+import mantenimientoRoutes from './routes/mantenimiento.routes.js';
 
 app.use('/api/auth', authRoutes);
 app.use('/api/solicitudes', solicitudesRoutes);
@@ -56,6 +60,11 @@ app.use('/api/archivos', archivosRoutes);
 app.use('/api/fichas', fichaExamenRoutes);
 app.use('/api/lista-espera', listaEsperaRoutes);
 app.use('/api/alumnos', alumnosRoutes);
+app.use('/api/aspirante', aspiranteRoutes);
+app.use('/api/pagos', pagoRoutes);
+app.use('/api/mantenimiento', mantenimientoRoutes);
+
+
 
 // Root endpoint
 app.get('/', (req, res) => {
@@ -103,6 +112,11 @@ app.listen(PORT, () => {
 ║                                                        ║
 ╚════════════════════════════════════════════════════════╝
   `);
+
+    // Iniciar tareas programadas (Cron Jobs)
+    if (process.env.NODE_ENV !== 'test') {
+        iniciarCronJobs();
+    }
 });
 
 export default app;

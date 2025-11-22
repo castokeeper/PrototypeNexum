@@ -244,3 +244,183 @@ export const obtenerEstadisticas = async (req, res, next) => {
         next(error);
     }
 };
+
+/**
+ * ========================================
+ * NUEVOS ENDPOINTS PARA FLUJO DE ASPIRANTES
+ * ========================================
+ */
+
+/**
+ * Crear solicitud de inscripción desde el portal del aspirante
+ * POST /api/solicitudes/inscripcion
+ */
+export const crearSolicitudInscripcion = async (req, res) => {
+    try {
+        const usuarioId = req.user.id;
+        const { datosPersonales, datosAcademicos, datosTutor, carreraId, turno, grupo } = req.body;
+
+        // Validar que el usuario sea aspirante
+        const usuario = await prisma.usuario.findUnique({
+            where: { id: usuarioId },
+            include: { fichaExamen: true }
+        });
+
+        if (!usuario) {
+            return res.status(404).json({ error: 'Usuario no encontrado' });
+        }
+
+        if (usuario.estatus !== 'pendiente_formulario') {
+            return res.status(400).json({
+                error: 'No tienes permisos para llenar el formulario de inscripción',
+                estatusActual: usuario.estatus
+            });
+        }
+
+        // Verificar que no tenga ya una solicitud
+        const solicitudExistente = await prisma.solicitud.findFirst({
+            where: { usuarioId }
+        });
+
+        if (solicitudExistente) {
+            return res.status(400).json({
+                error: 'Ya tienes una solicitud de inscripción',
+                solicitudId: solicitudExistente.id
+            });
+        }
+
+        // Validar datos requeridos
+        if (!datosPersonales || !datosAcademicos || !carreraId) {
+            return res.status(400).json({
+                error: 'Faltan datos requeridos (datosPersonales, datosAcademicos, carreraId)'
+            });
+        }
+
+        // Obtener monto de inscripción de las variables de entorno
+        const montoInscripcion = parseFloat(process.env.MONTO_INSCRIPCION || '1500.00');
+
+        // TRANSACCIÓN: Crear solicitud y actualizar usuario
+        const resultado = await prisma.$transaction(async (tx) => {
+            // 1. Crear solicitud
+            const solicitud = await tx.solicitud.create({
+                data: {
+                    usuarioId,
+                    carreraId: parseInt(carreraId),
+                    tipo: 'nuevo_ingreso',
+                    turno,
+                    grupo,
+                    estatus: 'pendiente',
+                    estatusPago: 'pendiente',
+                    montoPagar: montoInscripcion,
+                    datosPersonales: datosPersonales,  // JSON
+                    datosAcademicos: datosAcademicos,  // JSON
+                    datosTutor: datosTutor || null     // JSON (opcional)
+                },
+                include: {
+                    carrera: true,
+                    usuario: {
+                        select: {
+                            nombre: true,
+                            email: true
+                        }
+                    }
+                }
+            });
+
+            // 2. Actualizar estatus del usuario a pendiente_pago
+            await tx.usuario.update({
+                where: { id: usuarioId },
+                data: {
+                    estatus: 'pendiente_pago'
+                }
+            });
+
+            return solicitud;
+        });
+
+        res.status(201).json({
+            success: true,
+            message: 'Solicitud de inscripción creada exitosamente',
+            solicitud: {
+                id: resultado.id,
+                tipo: resultado.tipo,
+                estatus: resultado.estatus,
+                estatusPago: resultado.estatusPago,
+                montoPagar: resultado.montoPagar,
+                carrera: resultado.carrera.nombre,
+                turno: resultado.turno,
+                grupo: resultado.grupo,
+                fechaSolicitud: resultado.fechaSolicitud
+            },
+            proximoPaso: 'Realizar el pago de inscripción'
+        });
+    } catch (error) {
+        console.error('Error al crear solicitud de inscripción:', error);
+        res.status(500).json({
+            error: 'Error al crear la solicitud de inscripción',
+            details: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
+    }
+};
+
+/**
+ * Obtener la solicitud del usuario autenticado
+ * GET /api/solicitudes/mi-solicitud
+ */
+export const obtenerMiSolicitud = async (req, res) => {
+    try {
+        const usuarioId = req.user.id;
+
+        const solicitud = await prisma.solicitud.findFirst({
+            where: { usuarioId },
+            include: {
+                carrera: true,
+                documentos: true,
+                usuario: {
+                    select: {
+                        nombre: true,
+                        email: true,
+                        estatus: true
+                    }
+                }
+            }
+        });
+
+        if (!solicitud) {
+            return res.status(404).json({
+                error: 'No tienes ninguna solicitud de inscripción'
+            });
+        }
+
+        res.json({
+            solicitud: {
+                id: solicitud.id,
+                tipo: solicitud.tipo,
+                estatus: solicitud.estatus,
+                estatusPago: solicitud.estatusPago,
+                montoPagar: solicitud.montoPagar,
+                carrera: {
+                    id: solicitud.carrera.id,
+                    nombre: solicitud.carrera.nombre,
+                    codigo: solicitud.carrera.codigo
+                },
+                turno: solicitud.turno,
+                grupo: solicitud.grupo,
+                datosPersonales: solicitud.datosPersonales,
+                datosAcademicos: solicitud.datosAcademicos,
+                datosTutor: solicitud.datosTutor,
+                documentos: solicitud.documentos,
+                fechaSolicitud: solicitud.fechaSolicitud,
+                fechaPago: solicitud.fechaPago,
+                stripeSessionId: solicitud.stripeSessionId
+            }
+        });
+    } catch (error) {
+        console.error('Error al obtener solicitud:', error);
+        res.status(500).json({
+            error: 'Error al obtener tu solicitud',
+            details: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
+    }
+};
+
