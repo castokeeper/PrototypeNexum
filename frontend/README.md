@@ -6,9 +6,13 @@ Aplicación React para la gestión de solicitudes de inscripción y reinscripci�
 
 - **React 19** - Framework principal
 - **Vite** - Build tool
+- **Tailwind CSS v4.1** - Framework de estilos (con plugin de Vite)
 - **React Router DOM v7** - Navegación
 - **Lucide React** - Iconos
 - **React Toastify** - Notificaciones
+- **Recharts** - Gráficas y visualización de datos
+- **jsPDF** - Generación de PDFs
+
 
 ## 📦 Instalación
 

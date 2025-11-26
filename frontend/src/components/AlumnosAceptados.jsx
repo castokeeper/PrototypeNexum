@@ -1,5 +1,5 @@
 import { useSolicitudes } from '../context/SolicitudesContext';
-import { CheckCircle, User, GraduationCap, Clock, FileText } from 'lucide-react';
+import { CheckCircle, User, GraduationCap, Clock, FileText, Mail, Phone, Calendar, Award, Sparkles } from 'lucide-react';
 import { Card } from './common';
 import { formatearNombreCompleto, formatearFecha, formatearTipoSolicitud } from '../utils';
 
@@ -7,296 +7,194 @@ const AlumnosAceptados = () => {
   const { aceptados } = useSolicitudes();
 
   return (
-    <div style={containerStyle}>
-      <Card padding="comfortable" style={{ marginBottom: '2rem' }}>
-        <div style={headerContentStyle}>
-          <CheckCircle size={48} color="var(--success-green)" />
-          <div>
-            <h2 style={titleStyle}>Alumnos Aceptados</h2>
-            <p style={subtitleStyle}>
-              Total de estudiantes aceptados: <strong>{aceptados.length}</strong>
-            </p>
+    <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
+      {/* Hero Section */}
+      <div className="max-w-7xl mx-auto mb-8">
+        <div className="text-center mb-8 fade-in">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-effect mb-4">
+            <Award className="w-5 h-5 text-yellow-400" />
+            <span className="text-sm font-semibold gradient-text">Bienvenidos</span>
           </div>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4 gradient-text">
+            Estudiantes Aceptados
+          </h1>
+          <p className="text-lg" style={{ color: 'var(--text-secondary)' }}>
+            Felicidades a los nuevos miembros de nuestra comunidad académica
+          </p>
         </div>
-      </Card>
 
-      {aceptados.length === 0 ? (
-        <Card>
-          <div style={emptyStateStyle}>
-            <CheckCircle size={64} color="var(--text-tertiary)" />
-            <h3 style={emptyTitleStyle}>No hay alumnos aceptados aún</h3>
-            <p style={emptyTextStyle}>
-              Los alumnos aparecerán aquí una vez que sus solicitudes sean aprobadas
-            </p>
+        {/* Stats Card */}
+        <Card className="scale-in mb-8" style={{
+          background: 'linear-gradient(135deg, var(--success-green) 0%, #059669 100%)',
+          color: 'white',
+          borderRadius: '1.5rem',
+          boxShadow: 'var(--shadow-2xl)'
+        }}>
+          <div className="flex items-center justify-between p-6">
+            <div className="flex items-center gap-4">
+              <div className="p-4 bg-white/20 rounded-2xl backdrop-blur-sm">
+                <CheckCircle size={40} className="text-white" />
+              </div>
+              <div>
+                <p className="text-white/80 text-sm font-medium">Total de Aceptados</p>
+                <p className="text-4xl font-bold">{aceptados.length}</p>
+              </div>
+            </div>
+            <Sparkles size={48} className="text-white/30" />
           </div>
         </Card>
-      ) : (
-        <div style={gridStyle}>
-          {aceptados.map((alumno) => (
-            <Card key={alumno.id} hoverable padding="normal" style={cardStyle}>
-              <div style={cardHeaderStyle}>
-                <span style={{
-                  ...badgeStyle,
-                  backgroundColor: alumno.tipo === 'nuevo-ingreso' ? 'var(--primary-blue-light)' : 'var(--purple)'
-                }}>
-                  {formatearTipoSolicitud(alumno.tipo)}
-                </span>
-                <span style={{ ...badgeStyle, backgroundColor: 'var(--success-green)' }}>
-                  <CheckCircle size={16} />
-                  Aceptado
-                </span>
-              </div>
+      </div>
 
-              <div style={cardBodyStyle}>
-                <div style={avatarSectionStyle}>
-                  <div style={avatarStyle}>
-                    <User size={40} color="var(--primary-blue)" />
-                  </div>
-                  <div>
-                    <h3 style={nameStyle}>
-                      {formatearNombreCompleto(alumno.nombre, alumno.apellidoPaterno, alumno.apellidoMaterno)}
-                    </h3>
-                    {alumno.matricula && (
-                      <p style={matriculaStyle}>Matrícula: {alumno.matricula}</p>
-                    )}
-                  </div>
+      {/* Alumnos Grid */}
+      <div className="max-w-7xl mx-auto">
+        {aceptados.length === 0 ? (
+          <Card className="scale-in">
+            <div className="p-12 text-center">
+              <div className="inline-flex p-6 bg-gray-100 dark:bg-gray-800 rounded-full mb-4">
+                <CheckCircle size={64} style={{ color: 'var(--text-tertiary)' }} />
+              </div>
+              <h3 className="text-2xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
+                No hay alumnos aceptados aún
+              </h3>
+              <p className="text-base" style={{ color: 'var(--text-secondary)' }}>
+                Los alumnos aparecerán aquí una vez que sus solicitudes sean aprobadas
+              </p>
+            </div>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            {aceptados.map((alumno, index) => (
+              <Card
+                key={alumno.id}
+                className="hover-lift scale-in"
+                style={{
+                  animationDelay: `${index * 100}ms`,
+                  background: 'var(--bg-card)',
+                  borderRadius: '1.25rem',
+                  border: '2px solid var(--success-green)',
+                  overflow: 'hidden'
+                }}
+              >
+                {/* Card Header */}
+                <div className="p-4 flex items-center justify-between gap-2" style={{
+                  background: 'linear-gradient(135deg, var(--success-green) 0%, #059669 100%)'
+                }}>
+                  <span className="px-3 py-1 bg-white/90 rounded-full text-xs font-bold flex items-center gap-1.5" style={{
+                    color: alumno.tipo === 'nuevo-ingreso' ? 'var(--primary-blue)' : 'var(--purple)'
+                  }}>
+                    <FileText size={14} />
+                    {formatearTipoSolicitud(alumno.tipo)}
+                  </span>
+                  <span className="px-3 py-1 bg-white/90 text-green-700 rounded-full text-xs font-bold flex items-center gap-1.5">
+                    <CheckCircle size={14} />
+                    Aceptado
+                  </span>
                 </div>
 
-                <div style={dividerStyle}></div>
-
-                <div style={infoSectionStyle}>
-                  <div style={infoItemStyle}>
-                    <GraduationCap size={18} color="var(--text-secondary)" />
-                    <div>
-                      <p style={infoLabelStyle}>Carrera</p>
-                      <p style={infoValueStyle}>{alumno.carrera}</p>
+                {/* Card Body */}
+                <div className="p-6 space-y-4">
+                  {/* Avatar and Name */}
+                  <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 rounded-full flex items-center justify-center flex-shrink-0 shadow-md" style={{
+                      background: 'linear-gradient(135deg, var(--primary-blue) 0%, var(--purple) 100%)'
+                    }}>
+                      <User size={32} className="text-white" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-lg font-bold truncate" style={{ color: 'var(--text-primary)' }}>
+                        {formatearNombreCompleto(alumno.nombre, alumno.apellidoPaterno, alumno.apellidoMaterno)}
+                      </h3>
+                      {alumno.matricula && (
+                        <p className="text-sm font-mono font-semibold" style={{ color: 'var(--primary-blue)' }}>
+                          {alumno.matricula}
+                        </p>
+                      )}
                     </div>
                   </div>
 
-                  {alumno.grado && (
-                    <div style={infoItemStyle}>
-                      <FileText size={18} color="var(--text-secondary)" />
-                      <div>
-                        <p style={infoLabelStyle}>Grado y Grupo</p>
-                        <p style={infoValueStyle}>{alumno.grado}° - Grupo {alumno.grupo}</p>
+                  <div className="h-px" style={{ backgroundColor: 'var(--border-color)' }}></div>
+
+                  {/* Info Grid */}
+                  <div className="space-y-3">
+                    <div className="flex items-start gap-3">
+                      <GraduationCap size={18} className="mt-0.5 flex-shrink-0" style={{ color: 'var(--text-secondary)' }} />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--text-secondary)' }}>
+                          Carrera
+                        </p>
+                        <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+                          {alumno.carrera}
+                        </p>
+                      </div>
+                    </div>
+
+                    {alumno.grado && (
+                      <div className="flex items-start gap-3">
+                        <FileText size={18} className="mt-0.5 flex-shrink-0" style={{ color: 'var(--text-secondary)' }} />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--text-secondary)' }}>
+                            Grado y Grupo
+                          </p>
+                          <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+                            {alumno.grado}° - Grupo {alumno.grupo}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex items-start gap-3">
+                      <Clock size={18} className="mt-0.5 flex-shrink-0" style={{ color: 'var(--text-secondary)' }} />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--text-secondary)' }}>
+                          Turno
+                        </p>
+                        <p className="text-sm font-semibold capitalize" style={{ color: 'var(--text-primary)' }}>
+                          {alumno.turno}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="h-px" style={{ backgroundColor: 'var(--border-color)' }}></div>
+
+                  {/* Contact Info */}
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--text-secondary)' }}>
+                      <Mail size={14} className="flex-shrink-0" />
+                      <span className="truncate">{alumno.email}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--text-secondary)' }}>
+                      <Phone size={14} className="flex-shrink-0" />
+                      <span>{alumno.telefono}</span>
+                    </div>
+                    {alumno.fechaAceptacion && (
+                      <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--text-secondary)' }}>
+                        <Calendar size={14} className="flex-shrink-0" />
+                        <span>Aceptado: {formatearFecha(alumno.fechaAceptacion)}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Acceptance Badge */}
+                  {alumno.fechaAceptacion && (
+                    <div className="pt-3">
+                      <div className="p-3 rounded-lg text-center text-xs font-semibold" style={{
+                        background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%)',
+                        color: 'var(--success-green)',
+                        border: '1px solid rgba(16, 185, 129, 0.2)'
+                      }}>
+                        ✨ ¡Bienvenido a la comunidad! ✨
                       </div>
                     </div>
                   )}
-
-                  <div style={infoItemStyle}>
-                    <Clock size={18} color="var(--text-secondary)" />
-                    <div>
-                      <p style={infoLabelStyle}>Turno</p>
-                      <p style={infoValueStyle}>{alumno.turno}</p>
-                    </div>
-                  </div>
                 </div>
-
-                <div style={dividerStyle}></div>
-
-                <div style={contactSectionStyle}>
-                  <div style={contactItemStyle}>
-                    <strong>Email:</strong> {alumno.email}
-                  </div>
-                  <div style={contactItemStyle}>
-                    <strong>Teléfono:</strong> {alumno.telefono}
-                  </div>
-                  {alumno.fechaAceptacion && (
-                    <div style={dateAcceptedStyle}>
-                      ✅ Aceptado el: {formatearFecha(alumno.fechaAceptacion)}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </Card>
-          ))}
-        </div>
-      )}
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
 
-// Estilos mínimos
-const containerStyle = {
-  maxWidth: '1400px',
-  margin: '0 auto',
-  padding: '2rem',
-  minHeight: 'calc(100vh - 80px)'
-};
-
-const headerContentStyle = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: '1.5rem'
-};
-
-const titleStyle = {
-  fontSize: '2rem',
-  fontWeight: '700',
-  color: 'var(--primary-blue)',
-  margin: 0,
-  transition: 'color 0.3s ease'
-};
-
-const subtitleStyle = {
-  color: 'var(--text-secondary)',
-  fontSize: '1rem',
-  margin: '0.5rem 0 0 0',
-  transition: 'color 0.3s ease'
-};
-
-const emptyStateStyle = {
-  padding: '4rem 2rem',
-  textAlign: 'center'
-};
-
-const emptyTitleStyle = {
-  fontSize: '1.5rem',
-  color: 'var(--text-primary)',
-  marginTop: '1rem',
-  marginBottom: '0.5rem',
-  transition: 'color 0.3s ease'
-};
-
-const emptyTextStyle = {
-  color: 'var(--text-secondary)',
-  fontSize: '1rem',
-  transition: 'color 0.3s ease'
-};
-
-const gridStyle = {
-  display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))',
-  gap: '1.5rem'
-};
-
-const cardStyle = {
-  border: '2px solid var(--success-green)',
-  transition: 'all 0.2s ease'
-};
-
-const cardHeaderStyle = {
-  padding: '1rem',
-  backgroundColor: 'var(--bg-hover)',
-  borderBottom: '1px solid var(--border-color)',
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  gap: '0.5rem',
-  flexWrap: 'wrap',
-  transition: 'background-color 0.3s ease'
-};
-
-const badgeStyle = {
-  padding: '0.375rem 0.875rem',
-  borderRadius: '9999px',
-  color: 'white',
-  fontSize: '0.8rem',
-  fontWeight: '600',
-  display: 'flex',
-  alignItems: 'center',
-  gap: '0.375rem',
-  whiteSpace: 'nowrap'
-};
-
-const cardBodyStyle = {
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '1rem'
-};
-
-const avatarSectionStyle = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: '1rem'
-};
-
-const avatarStyle = {
-  width: '64px',
-  height: '64px',
-  borderRadius: '50%',
-  backgroundColor: 'rgba(59, 130, 246, 0.1)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  flexShrink: 0,
-  transition: 'background-color 0.3s ease'
-};
-
-const nameStyle = {
-  fontSize: '1.25rem',
-  fontWeight: '700',
-  color: 'var(--text-primary)',
-  margin: 0,
-  transition: 'color 0.3s ease'
-};
-
-const matriculaStyle = {
-  fontSize: '0.875rem',
-  color: 'var(--text-secondary)',
-  marginTop: '0.25rem',
-  transition: 'color 0.3s ease'
-};
-
-const dividerStyle = {
-  height: '1px',
-  backgroundColor: 'var(--border-color)',
-  transition: 'background-color 0.3s ease'
-};
-
-const infoSectionStyle = {
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '0.75rem'
-};
-
-const infoItemStyle = {
-  display: 'flex',
-  alignItems: 'flex-start',
-  gap: '0.75rem'
-};
-
-const infoLabelStyle = {
-  fontSize: '0.75rem',
-  color: 'var(--text-secondary)',
-  margin: 0,
-  fontWeight: '500',
-  textTransform: 'uppercase',
-  letterSpacing: '0.05em',
-  transition: 'color 0.3s ease'
-};
-
-const infoValueStyle = {
-  fontSize: '0.875rem',
-  color: 'var(--text-primary)',
-  margin: '0.125rem 0 0 0',
-  fontWeight: '600',
-  transition: 'color 0.3s ease'
-};
-
-const contactSectionStyle = {
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '0.5rem',
-  fontSize: '0.875rem'
-};
-
-const contactItemStyle = {
-  color: 'var(--text-secondary)',
-  transition: 'color 0.3s ease'
-};
-
-const dateAcceptedStyle = {
-  marginTop: '0.5rem',
-  padding: '0.5rem',
-  backgroundColor: 'rgba(16, 185, 129, 0.1)',
-  borderRadius: '0.375rem',
-  fontSize: '0.8125rem',
-  color: 'var(--success-green)',
-  fontWeight: '500',
-  textAlign: 'center',
-  transition: 'background-color 0.3s ease'
-};
-
 export default AlumnosAceptados;
-

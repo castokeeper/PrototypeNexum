@@ -1,5 +1,4 @@
 import PropTypes from 'prop-types';
-import styles from './Card.module.css';
 
 const Card = ({
   children,
@@ -9,27 +8,55 @@ const Card = ({
   padding = 'normal',
   hoverable = false,
   onClick,
-  className = ''
+  className = '',
+  style = {}
 }) => {
+  // Clases base con diseño moderno
+  const baseClasses = 'bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 transition-all duration-300';
+
+  // Padding variants
+  const paddingClasses = {
+    compact: 'p-4',
+    normal: 'p-6',
+    comfortable: 'p-8'
+  };
+
+  // Hover effects
+  const hoverClass = hoverable ? 'hover:shadow-2xl hover:-translate-y-1' : '';
+  const clickableClass = onClick ? 'cursor-pointer' : '';
+
   const cardClasses = [
-    styles.card,
-    padding === 'compact' && styles.compact,
-    padding === 'comfortable' && styles.comfortable,
-    hoverable && styles.hoverable,
-    onClick && styles.clickable,
+    baseClasses,
+    paddingClasses[padding] || paddingClasses.normal,
+    hoverClass,
+    clickableClass,
     className
   ].filter(Boolean).join(' ');
 
   return (
-    <div className={cardClasses} onClick={onClick}>
+    <div className={cardClasses} onClick={onClick} style={style}>
       {(title || subtitle) && (
-        <div className={styles.header}>
-          {title && <h2 className={styles.title}>{title}</h2>}
-          {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
+        <div className="mb-6 pb-4 border-b border-slate-200 dark:border-slate-700">
+          {title && (
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">
+              {title}
+            </h2>
+          )}
+          {subtitle && (
+            <p className="text-sm text-slate-600 dark:text-slate-400">
+              {subtitle}
+            </p>
+          )}
         </div>
       )}
-      <div className={styles.body}>{children}</div>
-      {footer && <div className={styles.footer}>{footer}</div>}
+      <div className="text-slate-900 dark:text-slate-100">
+        {children}
+      </div>
+      {footer && (
+        <div className="mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
+          {footer}
+        </div>
+      )}
     </div>
   );
 };
@@ -42,8 +69,10 @@ Card.propTypes = {
   padding: PropTypes.oneOf(['compact', 'normal', 'comfortable']),
   hoverable: PropTypes.bool,
   onClick: PropTypes.func,
-  className: PropTypes.string
+  className: PropTypes.string,
+  style: PropTypes.object
 };
 
 export default Card;
+
 

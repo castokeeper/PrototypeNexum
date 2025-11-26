@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
-import { FileText, User, Calendar, Phone, Mail, MapPin, GraduationCap, Clock } from 'lucide-react';
+import { FileText, User, Calendar, Phone, Mail, MapPin, GraduationCap, Clock, Sparkles, Send } from 'lucide-react';
 import { Button, Input, Card } from './common';
 
 const RegistroFicha = () => {
@@ -63,7 +63,7 @@ const RegistroFicha = () => {
                 throw new Error(data.error || 'Error al generar la ficha');
             }
 
-            toast.success('¡Ficha generada exitosamente!');
+            toast.success('¡Ficha generada exitosamente! 🎉');
 
             // Redirigir a página de confirmación con el folio
             navigate(`/consulta-ficha?folio=${data.ficha.folio}`, {
@@ -78,37 +78,52 @@ const RegistroFicha = () => {
     };
 
     return (
-        <div style={containerStyle}>
-            <div style={maxWidthContainer}>
-                <div style={headerStyle}>
-                    <div style={iconHeaderStyle}>
-                        <FileText size={48} color="var(--primary-blue)" />
-                    </div>
-                    <h1 style={titleStyle}>Solicitar Ficha de Examen</h1>
-                    <p style={subtitleStyle}>
-                        Completa el formulario para generar tu ficha de examen de admisión
-                    </p>
+        <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
+            {/* Hero Section */}
+            <div className="max-w-4xl mx-auto mb-8 text-center fade-in">
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-effect mb-4">
+                    <Sparkles className="w-5 h-5 text-purple-400" />
+                    <span className="text-sm font-semibold gradient-text">Proceso de Admisión</span>
                 </div>
+                <h1 className="text-4xl md:text-5xl font-bold mb-4 gradient-text">
+                    Solicitar Ficha de Examen
+                </h1>
+                <p className="text-lg" style={{ color: 'var(--text-secondary)' }}>
+                    Inicia tu registro y forma parte de nuestra comunidad académica
+                </p>
+            </div>
 
-                <Card padding="comfortable">
-                    <form onSubmit={handleSubmit} style={formStyle}>
+            {/* Form Container */}
+            <div className="max-w-4xl mx-auto">
+                <Card className="scale-in" style={{
+                    background: 'var(--bg-card)',
+                    borderRadius: '1.5rem',
+                    boxShadow: 'var(--shadow-2xl)',
+                    border: '1px solid var(--border-color)'
+                }}>
+                    <form onSubmit={handleSubmit} className="space-y-8 p-6 md:p-8">
+
                         {/* Datos Personales */}
-                        <div style={sectionStyle}>
-                            <h3 style={sectionTitleStyle}>
-                                <User size={20} />
-                                Datos Personales
-                            </h3>
+                        <div className="space-y-6">
+                            <div className="flex items-center gap-3 pb-3 border-b-2" style={{ borderColor: 'var(--primary-blue)' }}>
+                                <User className="w-6 h-6" style={{ color: 'var(--primary-blue)' }} />
+                                <h3 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
+                                    Datos Personales
+                                </h3>
+                            </div>
 
-                            <div style={gridStyle}>
-                                <Input
-                                    label="Nombre(s)"
-                                    name="nombre"
-                                    value={formData.nombre}
-                                    onChange={handleChange}
-                                    placeholder="Ingresa tu nombre"
-                                    icon={<User size={18} />}
-                                    required
-                                />
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div className="md:col-span-3">
+                                    <Input
+                                        label="Nombre(s)"
+                                        name="nombre"
+                                        value={formData.nombre}
+                                        onChange={handleChange}
+                                        placeholder="Ingresa tu nombre"
+                                        icon={<User size={18} />}
+                                        required
+                                    />
+                                </div>
 
                                 <Input
                                     label="Apellido Paterno"
@@ -136,29 +151,32 @@ const RegistroFicha = () => {
                                     placeholder="18 caracteres"
                                     maxLength={18}
                                     required
-                                    helperText="Escribe tu CURP completo (18 caracteres)"
                                 />
 
-                                <Input
-                                    label="Fecha de Nacimiento"
-                                    name="fechaNacimiento"
-                                    type="date"
-                                    value={formData.fechaNacimiento}
-                                    onChange={handleChange}
-                                    icon={<Calendar size={18} />}
-                                    required
-                                />
+                                <div className="md:col-span-2">
+                                    <Input
+                                        label="Fecha de Nacimiento"
+                                        name="fechaNacimiento"
+                                        type="date"
+                                        value={formData.fechaNacimiento}
+                                        onChange={handleChange}
+                                        icon={<Calendar size={18} />}
+                                        required
+                                    />
+                                </div>
                             </div>
                         </div>
 
                         {/* Contacto */}
-                        <div style={sectionStyle}>
-                            <h3 style={sectionTitleStyle}>
-                                <Phone size={20} />
-                                Información de Contacto
-                            </h3>
+                        <div className="space-y-6">
+                            <div className="flex items-center gap-3 pb-3 border-b-2" style={{ borderColor: 'var(--success-green)' }}>
+                                <Phone className="w-6 h-6" style={{ color: 'var(--success-green)' }} />
+                                <h3 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
+                                    Información de Contacto
+                                </h3>
+                            </div>
 
-                            <div style={gridStyle}>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <Input
                                     label="Teléfono"
                                     name="telefono"
@@ -193,20 +211,29 @@ const RegistroFicha = () => {
                         </div>
 
                         {/* Carrera y Turno */}
-                        <div style={sectionStyle}>
-                            <h3 style={sectionTitleStyle}>
-                                <GraduationCap size={20} />
-                                Selección de Carrera
-                            </h3>
+                        <div className="space-y-6">
+                            <div className="flex items-center gap-3 pb-3 border-b-2" style={{ borderColor: 'var(--purple)' }}>
+                                <GraduationCap className="w-6 h-6" style={{ color: 'var(--purple)' }} />
+                                <h3 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
+                                    Selección de Carrera
+                                </h3>
+                            </div>
 
-                            <div style={gridStyle}>
-                                <div style={inputGroupStyle}>
-                                    <label style={labelStyle}>Carrera</label>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <label className="block text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+                                        Carrera *
+                                    </label>
                                     <select
                                         name="carreraId"
                                         value={formData.carreraId}
                                         onChange={handleChange}
-                                        style={selectStyle}
+                                        className="w-full px-4 py-3 rounded-lg border transition-all duration-200 focus:ring-2 focus:ring-purple-500"
+                                        style={{
+                                            backgroundColor: 'var(--bg-primary)',
+                                            color: 'var(--text-primary)',
+                                            borderColor: 'var(--border-color)'
+                                        }}
                                         required
                                     >
                                         <option value="">Selecciona una carrera</option>
@@ -218,16 +245,21 @@ const RegistroFicha = () => {
                                     </select>
                                 </div>
 
-                                <div style={inputGroupStyle}>
-                                    <label style={labelStyle}>
+                                <div className="space-y-2">
+                                    <label className="block text-sm font-medium flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
                                         <Clock size={18} />
-                                        <span style={{ marginLeft: '0.5rem' }}>Turno Preferido</span>
+                                        Turno Preferido *
                                     </label>
                                     <select
                                         name="turnoPreferido"
                                         value={formData.turnoPreferido}
                                         onChange={handleChange}
-                                        style={selectStyle}
+                                        className="w-full px-4 py-3 rounded-lg border transition-all duration-200 focus:ring-2 focus:ring-purple-500"
+                                        style={{
+                                            backgroundColor: 'var(--bg-primary)',
+                                            color: 'var(--text-primary)',
+                                            borderColor: 'var(--border-color)'
+                                        }}
                                         required
                                     >
                                         <option value="matutino">Matutino</option>
@@ -239,142 +271,59 @@ const RegistroFicha = () => {
                         </div>
 
                         {/* Información importante */}
-                        <div style={infoBoxStyle}>
-                            <h4 style={{ margin: 0, color: 'var(--primary-blue)' }}>
-                                📋 Información Importante
+                        <div className="p-6 rounded-xl border-2 border-dashed" style={{
+                            borderColor: 'var(--primary-blue)',
+                            backgroundColor: 'rgba(37, 99, 235, 0.05)'
+                        }}>
+                            <h4 className="flex items-center gap-2 text-lg font-bold mb-3" style={{ color: 'var(--primary-blue)' }}>
+                                <FileText size={20} />
+                                Información Importante
                             </h4>
-                            <ul style={listStyle}>
-                                <li>Al enviar este formulario se generará tu ficha de examen con un folio único</li>
-                                <li>Recibirás el folio para consultar el estado de tu solicitud</li>
-                                <li>Guarda tu folio, lo necesitarás para consultar tu resultado</li>
-                                <li>Serás agregado automáticamente a la lista de espera</li>
+                            <ul className="space-y-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
+                                <li className="flex items-start gap-2">
+                                    <span className="text-blue-500 mt-0.5">✓</span>
+                                    Al enviar este formulario se generará tu ficha de examen con un folio único
+                                </li>
+                                <li className="flex items-start gap-2">
+                                    <span className="text-blue-500 mt-0.5">✓</span>
+                                    Recibirás el folio para consultar el estado de tu solicitud
+                                </li>
+                                <li className="flex items-start gap-2">
+                                    <span className="text-blue-500 mt-0.5">✓</span>
+                                    Guarda tu folio, lo necesitarás para consultar tu resultado
+                                </li>
+                                <li className="flex items-start gap-2">
+                                    <span className="text-blue-500 mt-0.5">✓</span>
+                                    Serás agregado automáticamente a la lista de espera
+                                </li>
                             </ul>
                         </div>
 
-                        <Button
-                            type="submit"
-                            variant="primary"
-                            size="large"
-                            fullWidth
-                            loading={loading}
-                            disabled={loading}
-                            icon={<FileText size={20} />}
-                        >
-                            {loading ? 'Generando Ficha...' : 'Generar Ficha de Examen'}
-                        </Button>
+                        {/* Submit Button */}
+                        <div className="pt-4">
+                            <Button
+                                type="submit"
+                                fullWidth
+                                loading={loading}
+                                disabled={loading}
+                                icon={<Send size={20} />}
+                                className="py-4 text-lg font-semibold rounded-xl hover-lift"
+                                style={{
+                                    background: loading
+                                        ? 'var(--text-tertiary)'
+                                        : 'linear-gradient(135deg, var(--purple) 0%, var(--primary-blue) 100%)',
+                                    color: 'white',
+                                    border: 'none'
+                                }}
+                            >
+                                {loading ? 'Generando Tu Ficha...' : 'Generar Ficha de Examen'}
+                            </Button>
+                        </div>
                     </form>
                 </Card>
             </div>
         </div>
     );
-};
-
-// Estilos
-const containerStyle = {
-    minHeight: 'calc(100vh - 80px)',
-    padding: '2rem',
-    backgroundColor: 'var(--bg-secondary)'
-};
-
-const maxWidthContainer = {
-    maxWidth: '900px',
-    margin: '0 auto'
-};
-
-const headerStyle = {
-    textAlign: 'center',
-    marginBottom: '2rem'
-};
-
-const iconHeaderStyle = {
-    display: 'inline-flex',
-    padding: '1rem',
-    borderRadius: '50%',
-    backgroundColor: 'rgba(59, 130, 246, 0.1)',
-    marginBottom: '1rem'
-};
-
-const titleStyle = {
-    fontSize: '2rem',
-    fontWeight: '700',
-    color: 'var(--text-primary)',
-    marginBottom: '0.5rem'
-};
-
-const subtitleStyle = {
-    color: 'var(--text-secondary)',
-    fontSize: '1rem'
-};
-
-const formStyle = {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '2rem'
-};
-
-const sectionStyle = {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '1rem'
-};
-
-const sectionTitleStyle = {
-    fontSize: '1.25rem',
-    fontWeight: '600',
-    color: 'var(--text-primary)',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.5rem',
-    marginBottom: '0.5rem',
-    paddingBottom: '0.5rem',
-    borderBottom: '2px solid var(--border-color)'
-};
-
-const gridStyle = {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-    gap: '1.5rem'
-};
-
-const inputGroupStyle = {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.5rem'
-};
-
-const labelStyle = {
-    fontSize: '0.875rem',
-    fontWeight: '600',
-    color: 'var(--text-primary)',
-    display: 'flex',
-    alignItems: 'center'
-};
-
-const selectStyle = {
-    padding: '0.75rem',
-    borderRadius: '0.5rem',
-    border: '1px solid var(--border-color)',
-    backgroundColor: 'var(--bg-primary)',
-    color: 'var(--text-primary)',
-    fontSize: '1rem',
-    cursor: 'pointer',
-    transition: 'all 0.2s ease',
-    outline: 'none'
-};
-
-const infoBoxStyle = {
-    backgroundColor: 'rgba(59, 130, 246, 0.1)',
-    border: '1px solid var(--primary-blue)',
-    borderRadius: '0.5rem',
-    padding: '1.5rem',
-    marginTop: '1rem'
-};
-
-const listStyle = {
-    marginTop: '1rem',
-    marginLeft: '1.5rem',
-    color: 'var(--text-secondary)',
-    lineHeight: '1.8'
 };
 
 export default RegistroFicha;

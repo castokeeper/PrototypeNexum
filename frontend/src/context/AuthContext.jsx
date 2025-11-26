@@ -61,6 +61,16 @@ export const AuthProvider = ({ children }) => {
         body: JSON.stringify({ username, password })
       });
 
+      // Check if response is JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        console.error('Backend no devolvió JSON. Status:', response.status);
+        return {
+          success: false,
+          message: 'Error en el servidor. Por favor intenta más tarde.'
+        };
+      }
+
       const data = await response.json();
 
       if (response.ok && data.token) {
@@ -82,7 +92,7 @@ export const AuthProvider = ({ children }) => {
       console.error('Error en login:', error);
       return {
         success: false,
-        message: 'Error al conectar con el servidor. Por favor verifica tu conexión.'
+        message: 'Error al conectar con el servidor. Por favor verifica que el backend esté corriendo.'
       };
     }
   };

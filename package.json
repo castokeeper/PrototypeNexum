@@ -1,5 +1,5 @@
 {
-  "name": "sistema-reinscripciones-nexum",
+  "name": "nexum-reinscripciones",
   "private": true,
   "version": "1.0.0",
   "description": "Sistema de gestión de reinscripciones - Monorepo con frontend y backend separados",
@@ -33,5 +33,9 @@
     "react",
     "express",
     "prisma"
-  ]
+  ],
+  "dependencies": {
+    "@tailwindcss/vite": "^4.1.17",
+    "tailwindcss": "^4.1.17"
+  }
 }

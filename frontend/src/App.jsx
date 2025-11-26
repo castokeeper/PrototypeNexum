@@ -33,28 +33,27 @@ function App() {
         <ThemeProvider>
           <AuthProvider>
             <SolicitudesProvider>
-              <div style={{
-                minHeight: '100vh',
-                width: '100%',
+              <div className="min-h-screen w-full flex flex-col" style={{
                 backgroundColor: 'var(--bg-secondary)',
-                display: 'flex',
-                flexDirection: 'column',
                 transition: 'background-color 0.3s ease'
               }}>
                 <Navigation />
-                <div style={{ flex: 1, width: '100%' }}>
+
+                {/* Main Content Area */}
+                <main className="flex-1 w-full">
                   <Suspense fallback={<Loading message="Cargando..." overlay />}>
                     <Routes>
+                      {/* Public Routes */}
                       <Route path="/" element={<NuevoIngreso />} />
                       <Route path="/reinscripcion" element={<Reinscripcion />} />
                       <Route path="/aceptados" element={<AlumnosAceptados />} />
                       <Route path="/login" element={<Login />} />
 
-                      {/* Rutas públicas para fichas de examen */}
+                      {/* Exam Form Routes */}
                       <Route path="/registro-ficha" element={<RegistroFicha />} />
                       <Route path="/consulta-ficha" element={<ConsultaFicha />} />
 
-                      {/* Rutas protegidas para aspirantes */}
+                      {/* Protected Routes - Aspirants */}
                       <Route
                         path="/portal-aspirante"
                         element={
@@ -85,7 +84,7 @@ function App() {
                       <Route path="/pago-exitoso" element={<PagoExitoso />} />
                       <Route path="/pago-cancelado" element={<PagoCancelado />} />
 
-                      {/* Rutas protegidas de admin */}
+                      {/* Protected Routes - Admin */}
                       <Route
                         path="/admin"
                         element={
@@ -112,18 +111,28 @@ function App() {
                       />
                     </Routes>
                   </Suspense>
-                </div>
+                </main>
+
+                {/* Toast Notifications */}
                 <ToastContainer
                   position="top-right"
-                  autoClose={3000}
+                  autoClose={3500}
                   hideProgressBar={false}
-                  newestOnTop={false}
+                  newestOnTop
                   closeOnClick
                   rtl={false}
                   pauseOnFocusLoss
                   draggable
                   pauseOnHover
                   theme="colored"
+                  style={{
+                    fontSize: '0.95rem',
+                    fontWeight: '500'
+                  }}
+                  toastClassName={() =>
+                    "relative flex p-4 min-h-16 rounded-xl overflow-hidden cursor-pointer shadow-xl"
+                  }
+                  bodyClassName={() => "flex items-center gap-2 px-2"}
                 />
               </div>
             </SolicitudesProvider>
