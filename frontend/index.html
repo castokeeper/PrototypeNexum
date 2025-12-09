@@ -1,13 +1,99 @@
 <!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>prototipo</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/logo.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Nexum - Sistema de Admisiones y Reinscripciones escolares" />
+  <meta name="theme-color" content="#2563eb" />
+  <title>Nexum - Sistema de Admisiones</title>
+
+  <!-- Script para prevenir parpadeo de tema - Ejecuta ANTES de cargar React -->
+  <script>
+    (function () {
+      try {
+        const savedTheme = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const theme = savedTheme || (prefersDark ? 'dark' : 'dark'); // Default to dark
+
+        // Limpiar clases previas
+        document.documentElement.classList.remove('light', 'dark');
+
+        // Aplicar tema
+        document.documentElement.classList.add(theme);
+        document.documentElement.setAttribute('data-theme', theme);
+        document.documentElement.style.colorScheme = theme;
+      } catch (e) {
+        // Fallback to dark theme
+        document.documentElement.classList.add('dark');
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
+  </script>
+
+  <!-- Estilos inline para prevenir flash de contenido sin estilo -->
+  <style>
+    html,
+    body,
+    #root {
+      min-height: 100vh;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Colores por defecto (modo claro) */
+    :root {
+      --page-bg: #f8fafc;
+      --page-text: #0f172a;
+    }
+
+    /* Modo oscuro */
+    :root[data-theme="dark"],
+    .dark {
+      --page-bg: #1e293b;
+      --page-text: #f8fafc;
+    }
+
+    body {
+      background-color: var(--page-bg);
+      color: var(--page-text);
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+  </style>
+
+  <!-- Preload de fuentes para mejor rendimiento -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
+
+  <!-- Script para aplicar tema al body después de cargarse -->
+  <script>
+    (function () {
+      try {
+        const savedTheme = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const theme = savedTheme || (prefersDark ? 'dark' : 'dark'); // Default to dark
+
+        // Limpiar clases previas
+        document.body.classList.remove('light', 'dark');
+
+        // Aplicar tema al body
+        document.body.classList.add(theme);
+        document.body.setAttribute('data-theme', theme);
+      } catch (e) {
+        // Fallback to dark theme
+        document.body.classList.add('dark');
+        document.body.setAttribute('data-theme', 'dark');
+      }
+    })();
+  </script>
+</body>
+
 </html>

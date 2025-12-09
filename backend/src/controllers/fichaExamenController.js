@@ -301,6 +301,12 @@ export const listarFichas = async (req, res) => {
 /**
  * Actualizar resultado de examen
  * PUT /api/fichas/:id/resultado
+ * 
+ * FLUJO:
+ * 1. Registra calificación y determina si aprobó
+ * 2. Actualiza estatus de la ficha (presentado/aprobado/rechazado)
+ * 3. NO cambia automáticamente la lista de espera
+ *    - El admin debe aceptar/rechazar manualmente desde AdminListaEspera
  */
 export const actualizarResultado = async (req, res) => {
     try {
@@ -308,7 +314,8 @@ export const actualizarResultado = async (req, res) => {
         const { fechaExamen, lugarExamen, calificacion, aprobado } = req.body;
 
         const ficha = await prisma.fichaExamen.findUnique({
-            where: { id: parseInt(id) }
+            where: { id: parseInt(id) },
+            include: { listaEspera: true }
         });
 
         if (!ficha) {
@@ -317,17 +324,31 @@ export const actualizarResultado = async (req, res) => {
             });
         }
 
+        // Determinar si aprobó basado en calificación (>=60) si no se especifica
+        let esAprobado = aprobado;
+        if (calificacion !== undefined && aprobado === undefined) {
+            esAprobado = parseFloat(calificacion) >= 60;
+        }
+
+        // Determinar nuevo estatus de la ficha
+        let nuevoEstatus;
+        if (calificacion !== undefined) {
+            nuevoEstatus = 'presentado'; // Ya presentó el examen
+        } else if (fechaExamen) {
+            nuevoEstatus = 'programado';
+        } else {
+            nuevoEstatus = ficha.estatus; // Mantener el actual
+        }
+
         // Actualizar ficha
         const fichaActualizada = await prisma.fichaExamen.update({
             where: { id: parseInt(id) },
             data: {
                 fechaExamen: fechaExamen ? new Date(fechaExamen) : undefined,
-                lugarExamen,
-                calificacion: calificacion ? parseFloat(calificacion) : undefined,
-                aprobado: aprobado !== undefined ? aprobado : undefined,
-                estatus: aprobado === true ? 'aprobado' :
-                    aprobado === false ? 'rechazado' :
-                        fechaExamen ? 'programado' : 'pendiente'
+                lugarExamen: lugarExamen || undefined,
+                calificacion: calificacion !== undefined ? parseFloat(calificacion) : undefined,
+                aprobado: esAprobado !== undefined ? esAprobado : undefined,
+                estatus: nuevoEstatus
             },
             include: {
                 carrera: true,
@@ -335,42 +356,27 @@ export const actualizarResultado = async (req, res) => {
             }
         });
 
-        // Si fue aprobado, actualizar lista de espera
-        if (aprobado === true && fichaActualizada.listaEspera) {
-            await prisma.listaEspera.update({
-                where: { id: fichaActualizada.listaEspera.id },
-                data: {
-                    estadoActual: 'aceptado',
-                    fechaAceptacion: new Date()
-                }
-            });
-        }
-
-        // Si fue rechazado, actualizar lista de espera
-        if (aprobado === false && fichaActualizada.listaEspera) {
-            await prisma.listaEspera.update({
-                where: { id: fichaActualizada.listaEspera.id },
-                data: {
-                    estadoActual: 'rechazado',
-                    fechaRechazo: new Date()
-                }
-            });
-        }
+        // Nota: NO cambiamos automáticamente la lista de espera
+        // El admin debe aceptar/rechazar manualmente desde la sección Lista de Espera
 
         res.json({
             success: true,
-            message: 'Resultado actualizado correctamente',
+            message: `Calificación registrada: ${fichaActualizada.calificacion}. ${esAprobado ? 'Aprobado' : 'No aprobado'}`,
             ficha: {
+                id: fichaActualizada.id,
                 folio: fichaActualizada.folio,
+                nombre: `${fichaActualizada.nombre} ${fichaActualizada.apellidoPaterno}`,
                 estatus: fichaActualizada.estatus,
                 calificacion: fichaActualizada.calificacion,
-                aprobado: fichaActualizada.aprobado
+                aprobado: fichaActualizada.aprobado,
+                estadoListaEspera: fichaActualizada.listaEspera?.estadoActual || null
             }
         });
     } catch (error) {
         console.error('Error al actualizar resultado:', error);
         res.status(500).json({
-            error: 'Error al actualizar el resultado'
+            error: 'Error al actualizar el resultado',
+            details: process.env.NODE_ENV === 'development' ? error.message : undefined
         });
     }
 };

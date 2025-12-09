@@ -1,7 +1,3 @@
-/**
- * Componente de Proceso de Pago
- * Maneja el proceso de pago con Stripe Checkout
- */
 
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -234,8 +230,8 @@ const ProcesoPago = () => {
                             onClick={handlePagar}
                             disabled={procesando}
                             className={`w-full py-4 rounded-lg font-bold text-lg flex items-center justify-center gap-3 transition-colors ${procesando
-                                    ? 'bg-gray-400 cursor-not-allowed'
-                                    : 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800'
+                                ? 'bg-gray-400 cursor-not-allowed'
+                                : 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800'
                                 } text-white shadow-lg`}
                         >
                             {procesando ? (
@@ -265,9 +261,9 @@ const ProcesoPago = () => {
                             ¿Qué pasa después del pago?
                         </h3>
                         <ul className="text-sm text-gray-600 space-y-2">
-                            <li>✓ Confirmaremos tu pago automáticamente</li>
-                            <li>✓ Recibirás tu número de control</li>
-                            <li>✓ Tendrás acceso completo al sistema</li>
+                            <li>Confirmaremos tu pago automaticamente</li>
+                            <li>Recibiras tu numero de control</li>
+                            <li>Tendras acceso completo al sistema</li>
                         </ul>
                     </div>
 
@@ -276,9 +272,9 @@ const ProcesoPago = () => {
                             Métodos de Pago Aceptados
                         </h3>
                         <ul className="text-sm text-gray-600 space-y-2">
-                            <li>✓ Tarjetas de crédito (Visa, Mastercard, etc.)</li>
-                            <li>✓ Tarjetas de débito</li>
-                            <li>✓ Pago seguro y verificado por Stripe</li>
+                            <li>Tarjetas de credito (Visa, Mastercard, etc.)</li>
+                            <li>Tarjetas de debito</li>
+                            <li>Pago seguro y verificado por Stripe</li>
                         </ul>
                     </div>
                 </div>

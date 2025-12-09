@@ -10,7 +10,7 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   outline: none;
 }
 
@@ -26,69 +26,87 @@
 
 /* Variantes */
 .primary {
-  background-color: var(--primary-blue);
+  background-color: #2563eb;
   color: white;
 }
 
 .primary:hover:not(:disabled) {
-  background-color: var(--primary-blue-hover);
+  background-color: #1d4ed8;
   transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .success {
-  background-color: var(--success-green);
+  background-color: #10b981;
   color: white;
 }
 
 .success:hover:not(:disabled) {
-  background-color: var(--success-green-hover);
+  background-color: #059669;
   transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .danger {
-  background-color: var(--danger-red);
+  background-color: #ef4444;
   color: white;
 }
 
 .danger:hover:not(:disabled) {
-  background-color: var(--danger-red-hover);
+  background-color: #dc2626;
   transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .warning {
-  background-color: var(--warning-orange);
+  background-color: #f59e0b;
   color: white;
 }
 
 .warning:hover:not(:disabled) {
-  background-color: var(--warning-orange-hover);
+  background-color: #d97706;
   transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .secondary {
-  background-color: var(--bg-tertiary);
-  color: var(--text-primary);
+  background-color: #e2e8f0;
+  color: #0f172a;
+}
+
+:global(.dark) .secondary {
+  background-color: #334155;
+  color: #f8fafc;
 }
 
 .secondary:hover:not(:disabled) {
-  background-color: var(--bg-hover);
+  background-color: #cbd5e1;
   transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+:global(.dark) .secondary:hover:not(:disabled) {
+  background-color: #475569;
 }
 
 .outline {
   background-color: transparent;
-  border: 2px solid var(--primary-blue);
-  color: var(--primary-blue);
+  border: 2px solid #2563eb;
+  color: #2563eb;
+}
+
+:global(.dark) .outline {
+  border-color: #3b82f6;
+  color: #3b82f6;
 }
 
 .outline:hover:not(:disabled) {
-  background-color: var(--primary-blue);
+  background-color: #2563eb;
   color: white;
+}
+
+:global(.dark) .outline:hover:not(:disabled) {
+  background-color: #3b82f6;
 }
 
 /* Tamaños */
@@ -138,4 +156,3 @@
     transform: rotate(360deg);
   }
 }
-

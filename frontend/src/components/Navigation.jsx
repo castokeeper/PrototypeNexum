@@ -1,220 +1,265 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { UserPlus, RefreshCw, Shield, LogOut, User, CheckCircle, Sun, Moon, FileText, Search, Users, Menu, X, ChevronDown, Home, GraduationCap, Settings } from 'lucide-react';
-import { useState } from 'react';
+import {
+  Shield, LogOut, User, CheckCircle, Sun, Moon, FileText, Search,
+  Users, Menu, X, ChevronDown, Home, GraduationCap, Settings, ClipboardList, Award
+} from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { toast } from 'react-toastify';
 
 const Navigation = () => {
   const { isAuthenticated, usuario, logout } = useAuth();
-  const { theme, toggleTheme } = useTheme();
+  const { theme, toggleTheme, isDark } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [solicitudesOpen, setSolicitudesOpen] = useState(false);
   const [adminOpen, setAdminOpen] = useState(false);
+  const adminRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (adminRef.current && !adminRef.current.contains(event.target)) {
+        setAdminOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    setMobileMenuOpen(false);
+    setAdminOpen(false);
+  }, [location.pathname]);
 
   const handleLogout = () => {
     logout();
-    toast.info('Sesión cerrada correctamente');
+    toast.info('Sesion cerrada correctamente');
     navigate('/');
     setMobileMenuOpen(false);
   };
 
   const isActive = (path) => location.pathname === path;
+  const isAdmin = isAuthenticated && ['admin', 'director', 'control_escolar'].includes(usuario?.rol);
+  const isAspirante = isAuthenticated && usuario?.rol === 'aspirante';
 
-  // Navegación principal para usuarios
-  const mainNavLinks = [
-    { to: '/', icon: Home, label: 'Inicio', description: 'Página principal' },
-  ];
-
-  // Dropdown de Solicitudes
-  const solicitudesLinks = [
-    { to: '/', icon: UserPlus, label: 'Nuevo Ingreso', description: 'Primera vez en la institución' },
-    { to: '/reinscripcion', icon: RefreshCw, label: 'Reinscripción', description: 'Renovar matrícula' },
-    { to: '/registro-ficha', icon: FileText, label: 'Registro de Examen', description: 'Solicitar ficha' },
-    { to: '/consulta-ficha', icon: Search, label: 'Consultar Ficha', description: 'Ver estado de ficha' },
-  ];
-
-  // Navegación de resultados
-  const resultsLinks = [
-    { to: '/aceptados', icon: CheckCircle, label: 'Alumnos Aceptados', description: 'Ver estudiantes admitidos' },
-  ];
-
-  // Navegación de administración
-  const adminLinks = isAuthenticated ? [
-    { to: '/admin', icon: Settings, label: 'Panel Admin', description: 'Administración general' },
-    { to: '/admin/lista-espera', icon: Users, label: 'Lista de Espera', description: 'Gestionar aspirantes' },
-    { to: '/admin/alumnos', icon: GraduationCap, label: 'Alumnos', description: 'Gestionar estudiantes' },
-  ] : [];
+  const navLinkStyle = (active) => ({
+    color: active ? 'var(--primary-blue)' : 'var(--text-primary)',
+    fontWeight: active ? '600' : '500'
+  });
 
   return (
-    <nav className="sticky top-0 z-50 backdrop-blur-lg bg-gradient-to-r from-blue-600 via-blue-700 to-purple-700 shadow-2xl border-b border-white/10">
+    <nav
+      className="sticky top-0 z-50 border-b"
+      style={{
+        backgroundColor: 'var(--bg-card)',
+        borderColor: 'var(--border-color)'
+      }}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
-          {/* Logo */}
-          <Link to="/" className="flex-shrink-0 scale-in group">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center group-hover:bg-white/30 transition-all">
-                <GraduationCap className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-white tracking-tight">
-                  ✨ Nexum
-                </h1>
-                <p className="text-xs text-white/70">Sistema de Admisiones</p>
-              </div>
+        <div className="flex items-center justify-between h-16">
+          <Link
+            to={isAdmin ? '/admin' : '/'}
+            className="flex items-center gap-3"
+          >
+            <div
+              className="p-2 rounded-lg flex items-center justify-center"
+              style={{ backgroundColor: 'var(--primary-blue)' }}
+            >
+              <img
+                src="/logo.svg"
+                alt="Nexum Logo"
+                className="w-6 h-6"
+                style={{ filter: 'brightness(0) invert(1)' }}
+              />
+            </div>
+            <div className="hidden sm:block">
+              <span
+                className="text-xl font-bold"
+                style={{ color: 'var(--text-primary)' }}
+              >
+                Nexum
+              </span>
+              <span
+                className="block text-xs"
+                style={{ color: 'var(--text-secondary)' }}
+              >
+                Sistema de Admisiones
+              </span>
             </div>
           </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-2">
-            {/* Inicio */}
-            {mainNavLinks.map((link) => (
-              <NavButton
-                key={link.to}
-                to={link.to}
-                icon={link.icon}
-                label={link.label}
-                isActive={isActive(link.to)}
-              />
-            ))}
+          <div className="hidden md:flex items-center gap-6">
+            {!isAdmin && (
+              <>
+                <Link
+                  to="/"
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
+                  style={navLinkStyle(isActive('/'))}
+                >
+                  <Home size={18} />
+                  Inicio
+                </Link>
 
-            {/* Solicitudes Dropdown */}
-            <div className="relative">
-              <button
-                onClick={() => setSolicitudesOpen(!solicitudesOpen)}
-                className={`
-                  flex flex-col items-center gap-1 px-4 py-2.5 rounded-xl text-white
-                  transition-all duration-200 hover:bg-white/20
-                  ${solicitudesOpen ? 'bg-white/20' : ''}
-                `}
-              >
-                <div className="flex items-center gap-2">
-                  <FileText size={20} />
-                  <span className="text-sm font-medium">Solicitudes</span>
-                  <ChevronDown size={16} className={`transition-transform ${solicitudesOpen ? 'rotate-180' : ''}`} />
-                </div>
-              </button>
+                {!isAspirante && (
+                  <>
+                    <Link
+                      to="/registro-ficha"
+                      className="flex items-center gap-2 px-3 py-2 rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
+                      style={navLinkStyle(isActive('/registro-ficha'))}
+                    >
+                      <FileText size={18} />
+                      Solicitar Ficha
+                    </Link>
 
-              {solicitudesOpen && (
-                <div className="absolute top-full left-0 mt-2 w-72 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden scale-in">
-                  {solicitudesLinks.map((link) => (
-                    <DropdownLink
-                      key={link.to}
-                      to={link.to}
-                      icon={link.icon}
-                      label={link.label}
-                      description={link.description}
-                      isActive={isActive(link.to)}
-                      onClick={() => setSolicitudesOpen(false)}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
+                    <Link
+                      to="/consulta-ficha"
+                      className="flex items-center gap-2 px-3 py-2 rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
+                      style={navLinkStyle(isActive('/consulta-ficha'))}
+                    >
+                      <Search size={18} />
+                      Consultar Ficha
+                    </Link>
+                  </>
+                )}
 
-            {/* Resultados */}
-            {resultsLinks.map((link) => (
-              <NavButton
-                key={link.to}
-                to={link.to}
-                icon={link.icon}
-                label={link.label}
-                isActive={isActive(link.to)}
-                color="green"
-              />
-            ))}
+                {isAspirante && (
+                  <Link
+                    to="/portal-aspirante"
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
+                    style={navLinkStyle(isActive('/portal-aspirante'))}
+                  >
+                    <ClipboardList size={18} />
+                    Mi Portal
+                  </Link>
+                )}
 
-            {/* Admin Dropdown */}
-            {isAuthenticated && (
-              <div className="relative">
+                <Link
+                  to="/aceptados"
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
+                  style={navLinkStyle(isActive('/aceptados'))}
+                >
+                  <CheckCircle size={18} />
+                  Aceptados
+                </Link>
+              </>
+            )}
+
+            {isAdmin && (
+              <div className="relative" ref={adminRef}>
                 <button
                   onClick={() => setAdminOpen(!adminOpen)}
-                  className={`
-                    flex flex-col items-center gap-1 px-4 py-2.5 rounded-xl text-white
-                    transition-all duration-200 hover:bg-orange-500/30
-                    ${adminOpen ? 'bg-orange-500/30' : ''}
-                  `}
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
+                  style={{ color: 'var(--text-primary)' }}
                 >
-                  <div className="flex items-center gap-2">
-                    <Shield size={20} />
-                    <span className="text-sm font-medium">Administración</span>
-                    <ChevronDown size={16} className={`transition-transform ${adminOpen ? 'rotate-180' : ''}`} />
-                  </div>
+                  <Shield size={18} />
+                  Administracion
+                  <ChevronDown
+                    size={16}
+                    className={`transition-transform ${adminOpen ? 'rotate-180' : ''}`}
+                  />
                 </button>
 
                 {adminOpen && (
-                  <div className="absolute top-full right-0 mt-2 w-72 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden scale-in">
-                    {adminLinks.map((link) => (
-                      <DropdownLink
-                        key={link.to}
-                        to={link.to}
-                        icon={link.icon}
-                        label={link.label}
-                        description={link.description}
-                        isActive={isActive(link.to)}
-                        onClick={() => setAdminOpen(false)}
-                      />
-                    ))}
+                  <div
+                    className="absolute top-full left-0 mt-2 w-56 rounded-lg shadow-lg border py-2"
+                    style={{
+                      backgroundColor: 'var(--bg-card)',
+                      borderColor: 'var(--border-color)'
+                    }}
+                  >
+                    <Link
+                      to="/admin"
+                      className="flex items-center gap-3 px-4 py-2 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
+                      style={{ color: 'var(--text-primary)' }}
+                    >
+                      <Settings size={18} />
+                      Panel Principal
+                    </Link>
+                    <Link
+                      to="/admin/lista-espera"
+                      className="flex items-center gap-3 px-4 py-2 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
+                      style={{ color: 'var(--text-primary)' }}
+                    >
+                      <Users size={18} />
+                      Lista de Espera
+                    </Link>
+                    <Link
+                      to="/admin/alumnos"
+                      className="flex items-center gap-3 px-4 py-2 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
+                      style={{ color: 'var(--text-primary)' }}
+                    >
+                      <GraduationCap size={18} />
+                      Alumnos Inscritos
+                    </Link>
+                    <Link
+                      to="/admin/calificaciones"
+                      className="flex items-center gap-3 px-4 py-2 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
+                      style={{ color: 'var(--text-primary)' }}
+                    >
+                      <Award size={18} />
+                      Calificaciones
+                    </Link>
                   </div>
                 )}
               </div>
             )}
+          </div>
 
-            {!isAuthenticated && (
-              <NavButton
-                to="/login"
-                icon={Shield}
-                label="Admin"
-                isActive={isActive('/login')}
-                color="orange"
-              />
-            )}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
+              aria-label="Cambiar tema"
+              style={{ color: 'var(--text-secondary)' }}
+            >
+              {isDark ? <Sun size={20} /> : <Moon size={20} />}
+            </button>
 
-            {/* User Info & Actions */}
-            {isAuthenticated && (
-              <>
-                <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/20 text-white ml-2">
-                  <div className="w-8 h-8 rounded-full bg-white/30 flex items-center justify-center">
-                    <User size={18} />
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-xs text-white/70">Hola,</span>
-                    <span className="text-sm font-semibold">{usuario?.nombre}</span>
-                  </div>
+            {isAuthenticated ? (
+              <div className="hidden md:flex items-center gap-3">
+                <div className="text-right">
+                  <p
+                    className="text-sm font-medium"
+                    style={{ color: 'var(--text-primary)' }}
+                  >
+                    {usuario?.nombre}
+                  </p>
+                  <p
+                    className="text-xs capitalize"
+                    style={{ color: 'var(--text-secondary)' }}
+                  >
+                    {usuario?.rol}
+                  </p>
                 </div>
                 <button
                   onClick={handleLogout}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-red-500/90 hover:bg-red-600 text-white transition-all hover:scale-105"
-                  title="Cerrar sesión"
+                  className="p-2 rounded-lg transition-colors hover:bg-red-50 dark:hover:bg-red-900/20"
+                  style={{ color: '#ef4444' }}
+                  title="Cerrar sesion"
                 >
-                  <LogOut size={18} />
+                  <LogOut size={20} />
                 </button>
-              </>
+              </div>
+            ) : (
+              <Link
+                to="/login"
+                className="hidden md:flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors"
+                style={{
+                  backgroundColor: 'var(--primary-blue)',
+                  color: 'white'
+                }}
+              >
+                <User size={18} />
+                Acceder
+              </Link>
             )}
 
-            {/* Theme Toggle */}
-            <button
-              onClick={toggleTheme}
-              className="p-2.5 rounded-xl bg-white/20 text-white hover:bg-white/30 transition-all hover:scale-110"
-              title={theme === 'light' ? 'Modo oscuro' : 'Modo claro'}
-            >
-              {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
-            </button>
-          </div>
-
-          {/* Mobile menu button */}
-          <div className="lg:hidden flex items-center gap-2">
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-lg bg-white/20 text-white"
-            >
-              {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
-            </button>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-lg bg-white/20 text-white hover:bg-white/30 transition-colors"
+              className="md:hidden p-2 rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
+              style={{ color: 'var(--text-primary)' }}
             >
               {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
@@ -222,195 +267,187 @@ const Navigation = () => {
         </div>
       </div>
 
-      {/* Mobile menu */}
       {mobileMenuOpen && (
-        <div className="lg:hidden border-t border-white/10 backdrop-blur-md bg-blue-700/95 slide-in max-h-[calc(100vh-5rem)] overflow-y-auto">
-          <div className="px-4 pt-2 pb-4 space-y-1">
-            {/* Main Links */}
-            {mainNavLinks.map((link) => (
-              <MobileNavLink
-                key={link.to}
-                to={link.to}
-                icon={link.icon}
-                label={link.label}
-                description={link.description}
-                isActive={isActive(link.to)}
-                onClick={() => setMobileMenuOpen(false)}
-              />
-            ))}
-
-            {/* Solicitudes Section */}
-            <div className="py-2">
-              <p className="px-3 text-xs font-semibold text-white/50 uppercase tracking-wider mb-2">
-                Solicitudes
-              </p>
-              {solicitudesLinks.map((link) => (
-                <MobileNavLink
-                  key={link.to}
-                  to={link.to}
-                  icon={link.icon}
-                  label={link.label}
-                  description={link.description}
-                  isActive={isActive(link.to)}
-                  onClick={() => setMobileMenuOpen(false)}
-                />
-              ))}
-            </div>
-
-            {/* Results Section */}
-            <div className="py-2">
-              <p className="px-3 text-xs font-semibold text-white/50 uppercase tracking-wider mb-2">
-                Resultados
-              </p>
-              {resultsLinks.map((link) => (
-                <MobileNavLink
-                  key={link.to}
-                  to={link.to}
-                  icon={link.icon}
-                  label={link.label}
-                  description={link.description}
-                  isActive={isActive(link.to)}
-                  onClick={() => setMobileMenuOpen(false)}
-                />
-              ))}
-            </div>
-
-            {/* Admin Section */}
-            {isAuthenticated && (
-              <div className="py-2">
-                <p className="px-3 text-xs font-semibold text-white/50 uppercase tracking-wider mb-2">
-                  Administración
-                </p>
-                {adminLinks.map((link) => (
-                  <MobileNavLink
-                    key={link.to}
-                    to={link.to}
-                    icon={link.icon}
-                    label={link.label}
-                    description={link.description}
-                    isActive={isActive(link.to)}
-                    onClick={() => setMobileMenuOpen(false)}
-                  />
-                ))}
-              </div>
-            )}
-
-            {!isAuthenticated && (
-              <MobileNavLink
-                to="/login"
-                icon={Shield}
-                label="Iniciar Sesión"
-                description="Acceso administrativo"
-                isActive={isActive('/login')}
-                onClick={() => setMobileMenuOpen(false)}
-              />
-            )}
-
-            {/* User Info Mobile */}
-            {isAuthenticated && (
+        <div
+          className="md:hidden border-t"
+          style={{
+            backgroundColor: 'var(--bg-card)',
+            borderColor: 'var(--border-color)'
+          }}
+        >
+          <div className="px-4 py-4 space-y-2">
+            {!isAdmin && (
               <>
-                <div className="flex items-center gap-3 px-4 py-3 rounded-lg bg-white/20 text-white mt-2">
-                  <div className="w-12 h-12 rounded-full bg-white/30 flex items-center justify-center">
-                    <User size={24} />
-                  </div>
-                  <div>
-                    <p className="text-xs text-white/70">Sesión iniciada como</p>
-                    <p className="font-semibold">{usuario?.nombre}</p>
-                    <p className="text-xs text-white/70 capitalize">{usuario?.rol}</p>
-                  </div>
-                </div>
-                <button
-                  onClick={handleLogout}
-                  className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-red-500/90 hover:bg-red-600 text-white font-medium transition-colors mt-2"
+                <Link
+                  to="/"
+                  className="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors"
+                  style={{
+                    backgroundColor: isActive('/') ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
+                    color: isActive('/') ? 'var(--primary-blue)' : 'var(--text-primary)'
+                  }}
                 >
-                  <LogOut size={20} />
-                  <span>Cerrar Sesión</span>
-                </button>
+                  <Home size={20} />
+                  Inicio
+                </Link>
+
+                {!isAspirante && (
+                  <>
+                    <Link
+                      to="/registro-ficha"
+                      className="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors"
+                      style={{
+                        backgroundColor: isActive('/registro-ficha') ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
+                        color: isActive('/registro-ficha') ? 'var(--primary-blue)' : 'var(--text-primary)'
+                      }}
+                    >
+                      <FileText size={20} />
+                      Solicitar Ficha
+                    </Link>
+
+                    <Link
+                      to="/consulta-ficha"
+                      className="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors"
+                      style={{
+                        backgroundColor: isActive('/consulta-ficha') ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
+                        color: isActive('/consulta-ficha') ? 'var(--primary-blue)' : 'var(--text-primary)'
+                      }}
+                    >
+                      <Search size={20} />
+                      Consultar Ficha
+                    </Link>
+                  </>
+                )}
+
+                {isAspirante && (
+                  <Link
+                    to="/portal-aspirante"
+                    className="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors"
+                    style={{
+                      backgroundColor: isActive('/portal-aspirante') ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
+                      color: isActive('/portal-aspirante') ? 'var(--primary-blue)' : 'var(--text-primary)'
+                    }}
+                  >
+                    <ClipboardList size={20} />
+                    Mi Portal
+                  </Link>
+                )}
+
+                <Link
+                  to="/aceptados"
+                  className="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors"
+                  style={{
+                    backgroundColor: isActive('/aceptados') ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
+                    color: isActive('/aceptados') ? 'var(--primary-blue)' : 'var(--text-primary)'
+                  }}
+                >
+                  <CheckCircle size={20} />
+                  Aceptados
+                </Link>
               </>
             )}
+
+            {isAdmin && (
+              <>
+                <Link
+                  to="/admin"
+                  className="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors"
+                  style={{
+                    backgroundColor: isActive('/admin') ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
+                    color: isActive('/admin') ? 'var(--primary-blue)' : 'var(--text-primary)'
+                  }}
+                >
+                  <Settings size={20} />
+                  Panel Principal
+                </Link>
+                <Link
+                  to="/admin/lista-espera"
+                  className="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors"
+                  style={{
+                    backgroundColor: isActive('/admin/lista-espera') ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
+                    color: isActive('/admin/lista-espera') ? 'var(--primary-blue)' : 'var(--text-primary)'
+                  }}
+                >
+                  <Users size={20} />
+                  Lista de Espera
+                </Link>
+                <Link
+                  to="/admin/alumnos"
+                  className="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors"
+                  style={{
+                    backgroundColor: isActive('/admin/alumnos') ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
+                    color: isActive('/admin/alumnos') ? 'var(--primary-blue)' : 'var(--text-primary)'
+                  }}
+                >
+                  <GraduationCap size={20} />
+                  Alumnos Inscritos
+                </Link>
+                <Link
+                  to="/admin/calificaciones"
+                  className="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors"
+                  style={{
+                    backgroundColor: isActive('/admin/calificaciones') ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
+                    color: isActive('/admin/calificaciones') ? 'var(--primary-blue)' : 'var(--text-primary)'
+                  }}
+                >
+                  <Award size={20} />
+                  Calificaciones
+                </Link>
+              </>
+            )}
+
+            <div
+              className="border-t pt-4 mt-4"
+              style={{ borderColor: 'var(--border-color)' }}
+            >
+              {isAuthenticated ? (
+                <div className="space-y-3">
+                  <div
+                    className="px-4 py-2 rounded-lg"
+                    style={{ backgroundColor: 'var(--bg-hover)' }}
+                  >
+                    <p
+                      className="font-medium"
+                      style={{ color: 'var(--text-primary)' }}
+                    >
+                      {usuario?.nombre}
+                    </p>
+                    <p
+                      className="text-sm capitalize"
+                      style={{ color: 'var(--text-secondary)' }}
+                    >
+                      {usuario?.rol}
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors"
+                    style={{
+                      backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                      color: '#ef4444'
+                    }}
+                  >
+                    <LogOut size={20} />
+                    Cerrar Sesion
+                  </button>
+                </div>
+              ) : (
+                <Link
+                  to="/login"
+                  className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium"
+                  style={{
+                    backgroundColor: 'var(--primary-blue)',
+                    color: 'white'
+                  }}
+                >
+                  <User size={20} />
+                  Acceder al Sistema
+                </Link>
+              )}
+            </div>
           </div>
         </div>
       )}
     </nav>
-  );
-};
-
-// Desktop Nav Button Component
-const NavButton = ({ to, icon: Icon, label, isActive, color = 'blue' }) => {
-  const colorClasses = {
-    blue: 'hover:bg-blue-500/20',
-    green: 'hover:bg-green-500/20',
-    orange: 'hover:bg-orange-500/20',
-  };
-
-  return (
-    <Link
-      to={to}
-      className={`
-        flex flex-col items-center gap-1 px-4 py-2.5 rounded-xl text-white
-        transition-all duration-200 hover:scale-105
-        ${isActive
-          ? 'bg-white/25 shadow-lg'
-          : colorClasses[color]
-        }
-      `}
-    >
-      <Icon size={22} />
-      <span className="text-xs font-medium whitespace-nowrap">{label}</span>
-    </Link>
-  );
-};
-
-// Dropdown Link Component
-const DropdownLink = ({ to, icon: Icon, label, description, isActive, onClick }) => {
-  return (
-    <Link
-      to={to}
-      onClick={onClick}
-      className={`
-        flex items-start gap-3 px-4 py-3 transition-all
-        ${isActive
-          ? 'bg-blue-50 dark:bg-blue-900/30 border-l-4 border-blue-600'
-          : 'hover:bg-gray-50 dark:hover:bg-gray-700/50'
-        }
-      `}
-    >
-      <Icon size={20} className={`mt-0.5 ${isActive ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400'}`} />
-      <div className="flex-1">
-        <p className={`text-sm font-semibold ${isActive ? 'text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-white'}`}>
-          {label}
-        </p>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-          {description}
-        </p>
-      </div>
-    </Link>
-  );
-};
-
-// Mobile Nav Link Component
-const MobileNavLink = ({ to, icon: Icon, label, description, isActive, onClick }) => {
-  return (
-    <Link
-      to={to}
-      onClick={onClick}
-      className={`
-        flex items-start gap-3 px-4 py-3 rounded-lg font-medium
-        transition-all duration-200
-        ${isActive
-          ? 'bg-white/25 text-white shadow-lg'
-          : 'text-white/90 hover:bg-white/10'
-        }
-      `}
-    >
-      <Icon size={22} className="mt-0.5 flex-shrink-0" />
-      <div className="flex-1">
-        <p className="font-semibold">{label}</p>
-        {description && (
-          <p className="text-xs text-white/70 mt-0.5">{description}</p>
-        )}
-      </div>
-    </Link>
   );
 };
 

@@ -59,7 +59,7 @@ const NuevoIngreso = () => {
         comprobante: previewUrl
       });
 
-      toast.success('¡Solicitud enviada correctamente! 🎉');
+      toast.success('Solicitud enviada correctamente');
       resetForm();
       clearFile();
 

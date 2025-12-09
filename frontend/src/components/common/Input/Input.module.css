@@ -7,14 +7,18 @@
 
 .label {
   font-weight: 500;
-  color: var(--text-primary);
+  color: #0f172a;
   font-size: 0.875rem;
   transition: color 0.3s ease;
 }
 
+:global(.dark) .label {
+  color: #f8fafc;
+}
+
 .required::after {
   content: ' *';
-  color: var(--danger-red);
+  color: #ef4444;
 }
 
 .input,
@@ -22,29 +26,62 @@
 .select {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid var(--border-color);
+  border: 1px solid #e2e8f0;
   border-radius: 0.5rem;
   font-size: 1rem;
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
+  background-color: #ffffff;
+  color: #0f172a;
   transition: all 0.2s ease;
   outline: none;
   font-family: inherit;
 }
 
+/* Tema oscuro para inputs */
+:global(.dark) .input,
+:global(.dark) .textarea,
+:global(.dark) .select {
+  background-color: #1e293b;
+  border-color: #334155;
+  color: #f8fafc;
+}
+
+/* Placeholder */
+.input::placeholder,
+.textarea::placeholder {
+  color: #94a3b8;
+}
+
+:global(.dark) .input::placeholder,
+:global(.dark) .textarea::placeholder {
+  color: #64748b;
+}
+
 .input:focus,
 .textarea:focus,
 .select:focus {
-  border-color: var(--primary-blue-light);
+  border-color: #3b82f6;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+:global(.dark) .input:focus,
+:global(.dark) .textarea:focus,
+:global(.dark) .select:focus {
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
 }
 
 .input:disabled,
 .textarea:disabled,
 .select:disabled {
-  background-color: var(--bg-tertiary);
+  background-color: #f1f5f9;
   cursor: not-allowed;
   opacity: 0.6;
+}
+
+:global(.dark) .input:disabled,
+:global(.dark) .textarea:disabled,
+:global(.dark) .select:disabled {
+  background-color: #334155;
 }
 
 .textarea {
@@ -57,7 +94,7 @@
 }
 
 .error {
-  border-color: var(--danger-red);
+  border-color: #ef4444 !important;
 }
 
 .error:focus {
@@ -66,7 +103,7 @@
 
 .errorMessage {
   font-size: 0.875rem;
-  color: var(--danger-red);
+  color: #ef4444;
   margin-top: 0.25rem;
   display: flex;
   align-items: center;
@@ -75,8 +112,12 @@
 
 .helperText {
   font-size: 0.875rem;
-  color: var(--text-secondary);
+  color: #64748b;
   margin-top: 0.25rem;
+}
+
+:global(.dark) .helperText {
+  color: #94a3b8;
 }
 
 .icon {
@@ -84,8 +125,12 @@
   right: 0.75rem;
   top: 50%;
   transform: translateY(-50%);
-  color: var(--text-secondary);
+  color: #64748b;
   pointer-events: none;
+}
+
+:global(.dark) .icon {
+  color: #94a3b8;
 }
 
 .inputWrapper {
@@ -96,4 +141,3 @@
 .inputWithIcon {
   padding-right: 2.5rem;
 }
-

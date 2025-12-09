@@ -4,7 +4,7 @@ import { toast } from 'react-toastify';
 import { Upload, Send, Mail, Phone, Hash, BookOpen, User, GraduationCap, Clock, RefreshCw, Sparkles } from 'lucide-react';
 import { Button, Input, Card } from './common';
 import { useForm, useFileUpload } from '../hooks';
-import { validarFormularioReinscripcion, CARRERAS, TURNOS, SEMESTRES, GRUPOS } from '../utils';
+import { validarFormularioReinscripcion, CARRERAS, TURNOS, SEMESTRES, getGruposPorTurno } from '../utils';
 
 const initialFormData = {
   nombre: '',
@@ -59,7 +59,7 @@ const Reinscripcion = () => {
         comprobante: previewUrl
       });
 
-      toast.success('¡Solicitud de reinscripción enviada correctamente! 🎉');
+      toast.success('Solicitud de reinscripcion enviada correctamente');
       resetForm();
       clearFile();
 
@@ -248,8 +248,8 @@ const Reinscripcion = () => {
                     required
                   >
                     <option value="">Selecciona el grupo</option>
-                    {GRUPOS.map(grupo => (
-                      <option key={grupo} value={grupo}>{grupo}</option>
+                    {getGruposPorTurno(formData.turno).map(grupo => (
+                      <option key={grupo.value} value={grupo.value}>{grupo.label}</option>
                     ))}
                   </select>
                   {errors.grupo && (

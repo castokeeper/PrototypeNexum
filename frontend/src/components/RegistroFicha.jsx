@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
-import { FileText, User, Calendar, Phone, Mail, MapPin, GraduationCap, Clock, Sparkles, Send } from 'lucide-react';
+import { FileText, User, Calendar, Phone, Mail, MapPin, GraduationCap, Clock, Sparkles, Send, CheckCircle } from 'lucide-react';
 import { Button, Input, Card } from './common';
 
 const RegistroFicha = () => {
@@ -63,7 +63,7 @@ const RegistroFicha = () => {
                 throw new Error(data.error || 'Error al generar la ficha');
             }
 
-            toast.success('¡Ficha generada exitosamente! 🎉');
+            toast.success('Ficha generada exitosamente');
 
             // Redirigir a página de confirmación con el folio
             navigate(`/consulta-ficha?folio=${data.ficha.folio}`, {
@@ -264,7 +264,6 @@ const RegistroFicha = () => {
                                     >
                                         <option value="matutino">Matutino</option>
                                         <option value="vespertino">Vespertino</option>
-                                        <option value="nocturno">Nocturno</option>
                                     </select>
                                 </div>
                             </div>
@@ -281,19 +280,19 @@ const RegistroFicha = () => {
                             </h4>
                             <ul className="space-y-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
                                 <li className="flex items-start gap-2">
-                                    <span className="text-blue-500 mt-0.5">✓</span>
+                                    <CheckCircle size={14} className="text-blue-500 mt-0.5" />
                                     Al enviar este formulario se generará tu ficha de examen con un folio único
                                 </li>
                                 <li className="flex items-start gap-2">
-                                    <span className="text-blue-500 mt-0.5">✓</span>
+                                    <CheckCircle size={14} className="text-blue-500 mt-0.5" />
                                     Recibirás el folio para consultar el estado de tu solicitud
                                 </li>
                                 <li className="flex items-start gap-2">
-                                    <span className="text-blue-500 mt-0.5">✓</span>
+                                    <CheckCircle size={14} className="text-blue-500 mt-0.5" />
                                     Guarda tu folio, lo necesitarás para consultar tu resultado
                                 </li>
                                 <li className="flex items-start gap-2">
-                                    <span className="text-blue-500 mt-0.5">✓</span>
+                                    <CheckCircle size={14} className="text-blue-500 mt-0.5" />
                                     Serás agregado automáticamente a la lista de espera
                                 </li>
                             </ul>

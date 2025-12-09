@@ -183,7 +183,7 @@ const AlumnosAceptados = () => {
                         color: 'var(--success-green)',
                         border: '1px solid rgba(16, 185, 129, 0.2)'
                       }}>
-                        ✨ ¡Bienvenido a la comunidad! ✨
+                        Bienvenido a la comunidad
                       </div>
                     </div>
                   )}

@@ -5,10 +5,26 @@
 
 import Stripe from 'stripe';
 
-// Inicializar Stripe con la clave secreta
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-    apiVersion: '2024-11-20.acacia'
-});
+// Inicializar Stripe solo si hay clave configurada
+let stripe = null;
+
+if (process.env.STRIPE_SECRET_KEY) {
+    stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+        apiVersion: '2024-11-20.acacia'
+    });
+    console.log('✅ Stripe inicializado correctamente');
+} else {
+    console.warn('⚠️ STRIPE_SECRET_KEY no configurada - Pagos deshabilitados');
+}
+
+/**
+ * Verifica si Stripe está disponible
+ */
+const verificarStripeDisponible = () => {
+    if (!stripe) {
+        throw new Error('Stripe no está configurado. Configure STRIPE_SECRET_KEY en el archivo .env');
+    }
+};
 
 /**
  * Crear sesión de checkout de Stripe
@@ -20,6 +36,7 @@ export const crearSesionCheckout = async ({
     nombreCliente,
     carreraNombre
 }) => {
+    verificarStripeDisponible();
     try {
         // Crear la sesión de checkout
         const session = await stripe.checkout.sessions.create({
@@ -72,6 +89,7 @@ export const crearSesionCheckout = async ({
  * Verificar sesión de checkout
  */
 export const verificarSesion = async (sessionId) => {
+    verificarStripeDisponible();
     try {
         const session = await stripe.checkout.sessions.retrieve(sessionId, {
             expand: ['payment_intent']
@@ -96,6 +114,7 @@ export const verificarSesion = async (sessionId) => {
  * Obtener información del PaymentIntent
  */
 export const obtenerPaymentIntent = async (paymentIntentId) => {
+    verificarStripeDisponible();
     try {
         const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
 
@@ -117,6 +136,7 @@ export const obtenerPaymentIntent = async (paymentIntentId) => {
  * Verificar webhook de Stripe
  */
 export const verificarWebhook = (payload, signature) => {
+    verificarStripeDisponible();
     try {
         const event = stripe.webhooks.constructEvent(
             payload,
@@ -134,6 +154,7 @@ export const verificarWebhook = (payload, signature) => {
  * Crear reembolso
  */
 export const crearReembolso = async (paymentIntentId, monto = null) => {
+    verificarStripeDisponible();
     try {
         const refund = await stripe.refunds.create({
             payment_intent: paymentIntentId,

@@ -1,7 +1,3 @@
-/**
- * Página de Pago Cancelado
- * Se muestra cuando el usuario cancela el pago
- */
 
 import { useNavigate } from 'react-router-dom';
 import { XCircle, ArrowLeft, CreditCard, HelpCircle } from 'lucide-react';
@@ -72,13 +68,13 @@ const PagoCancelado = () => {
                         {/* Información Importante */}
                         <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
                             <h3 className="font-bold text-blue-900 mb-3">
-                                ℹ️ Información Importante
+                                Informacion Importante
                             </h3>
                             <ul className="space-y-2 text-blue-800">
-                                <li>✓ Tu solicitud de inscripción sigue activa</li>
-                                <li>✓ Puedes realizar el pago en cualquier momento</li>
-                                <li>✓ No se ha realizado ningún cargo a tu tarjeta</li>
-                                <li>✓ Tus datos están seguros y protegidos</li>
+                                <li>Tu solicitud de inscripcion sigue activa</li>
+                                <li>Puedes realizar el pago en cualquier momento</li>
+                                <li>No se ha realizado ningun cargo a tu tarjeta</li>
+                                <li>Tus datos estan seguros y protegidos</li>
                             </ul>
                         </div>
 
@@ -112,7 +108,7 @@ const PagoCancelado = () => {
                         Si tienes problemas con el pago o preguntas sobre el proceso, estamos aquí para ayudarte.
                     </p>
                     <p className="text-sm text-gray-500">
-                        📧 Email: soporte@institucion.edu.mx | ☎️ Tel: (123) 456-7890
+                        Email: soporte@cetis120.edu.mx | Tel: (123) 456-7890
                     </p>
                     <p className="text-xs text-gray-400 mt-2">
                         Horario de atención: Lunes a Viernes, 9:00 AM - 6:00 PM

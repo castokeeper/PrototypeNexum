@@ -282,40 +282,57 @@ const AdminListaEspera = () => {
                                         </div>
 
                                         {/* Acciones */}
-                                        {aspirante.estadoEspera === 'en_espera' && aspirante.aprobado && (
-                                            <div style={accionesStyle}>
-                                                <Button
-                                                    variant="success"
-                                                    icon={<CheckCircle size={18} />}
-                                                    onClick={() => aceptarAspirante(aspirante.id)}
-                                                    loading={procesando === aspirante.id}
-                                                    disabled={procesando !== null}
-                                                >
-                                                    Aceptar y Crear Alumno
-                                                </Button>
-                                                <Button
-                                                    variant="danger"
-                                                    icon={<XCircle size={18} />}
-                                                    onClick={() => rechazarAspirante(aspirante.id)}
-                                                    loading={procesando === aspirante.id}
-                                                    disabled={procesando !== null}
-                                                >
-                                                    Rechazar
-                                                </Button>
-                                            </div>
+                                        {aspirante.estadoEspera === 'en_espera' && (
+                                            <>
+                                                {/* Advertencia si no tiene calificación */}
+                                                {aspirante.calificacion === null && (
+                                                    <div style={infoBoxStyle}>
+                                                        <Calendar size={18} />
+                                                        <span>Este aspirante aún no tiene calificación registrada</span>
+                                                    </div>
+                                                )}
+
+                                                <div style={accionesStyle}>
+                                                    <Button
+                                                        variant="success"
+                                                        icon={<CheckCircle size={18} />}
+                                                        onClick={() => aceptarAspirante(aspirante.id)}
+                                                        loading={procesando === aspirante.id}
+                                                        disabled={procesando !== null}
+                                                    >
+                                                        Aceptar Aspirante
+                                                    </Button>
+                                                    <Button
+                                                        variant="danger"
+                                                        icon={<XCircle size={18} />}
+                                                        onClick={() => rechazarAspirante(aspirante.id)}
+                                                        loading={procesando === aspirante.id}
+                                                        disabled={procesando !== null}
+                                                    >
+                                                        Rechazar
+                                                    </Button>
+                                                </div>
+                                            </>
                                         )}
 
-                                        {aspirante.aprobado === false && (
+                                        {aspirante.aprobado === false && aspirante.estadoEspera !== 'en_espera' && (
                                             <div style={warningBoxStyle}>
                                                 <XCircle size={18} />
                                                 <span>Este aspirante no aprobó el examen</span>
                                             </div>
                                         )}
 
-                                        {aspirante.aprobado === true && aspirante.estadoEspera === 'aceptado' && (
+                                        {aspirante.estadoEspera === 'rechazado' && (
+                                            <div style={warningBoxStyle}>
+                                                <XCircle size={18} />
+                                                <span>Aspirante rechazado</span>
+                                            </div>
+                                        )}
+
+                                        {aspirante.estadoEspera === 'aceptado' && (
                                             <div style={successBoxStyle}>
                                                 <CheckCircle size={18} />
-                                                <span>Aspirante aceptado - Alumno creado</span>
+                                                <span>Aspirante aceptado - Puede llenar formulario de inscripción</span>
                                             </div>
                                         )}
                                     </div>
@@ -475,6 +492,18 @@ const detailItemStyle = {
 const accionesStyle = {
     display: 'flex',
     gap: '1rem',
+    marginTop: '1rem'
+};
+
+const infoBoxStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.75rem',
+    padding: '1rem',
+    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+    border: '1px solid #3b82f6',
+    borderRadius: '0.5rem',
+    color: '#3b82f6',
     marginTop: '1rem'
 };
 

@@ -14,7 +14,6 @@ export const obtenerAlumnos = async (req, res) => {
         const {
             page = 1,
             limit = 20,
-            carreraId,
             estatus,
             search
         } = req.query;
@@ -24,21 +23,17 @@ export const obtenerAlumnos = async (req, res) => {
         // Construir filtros
         const where = {};
 
-        if (carreraId) {
-            where.carreraId = parseInt(carreraId);
-        }
-
         if (estatus) {
-            where.estatus = estatus;
+            where.estatusAlumno = estatus;
         }
 
         if (search) {
             where.OR = [
-                { numeroControl: { contains: search, mode: 'insensitive' } },
-                { nombre: { contains: search, mode: 'insensitive' } },
-                { apellidoPaterno: { contains: search, mode: 'insensitive' } },
-                { apellidoMaterno: { contains: search, mode: 'insensitive' } },
-                { curp: { contains: search, mode: 'insensitive' } }
+                { nombre: { contains: search } },
+                { apellidoPaterno: { contains: search } },
+                { apellidoMaterno: { contains: search } },
+                { curp: { contains: search } },
+                { email: { contains: search } }
             ];
         }
 
@@ -46,11 +41,16 @@ export const obtenerAlumnos = async (req, res) => {
             prisma.alumno.findMany({
                 where,
                 include: {
-                    carrera: true,
-                    solicitud: {
+                    fichaExamen: {
+                        include: {
+                            carrera: true
+                        }
+                    },
+                    solicitudes: {
+                        take: 1,
+                        orderBy: { fechaSolicitud: 'desc' },
                         select: {
                             id: true,
-                            folio: true,
                             estatusPago: true
                         }
                     }
@@ -65,7 +65,6 @@ export const obtenerAlumnos = async (req, res) => {
         res.json({
             alumnos: alumnos.map(a => ({
                 id: a.id,
-                numeroControl: a.numeroControl,
                 nombre: `${a.nombre} ${a.apellidoPaterno} ${a.apellidoMaterno}`,
                 nombreCompleto: {
                     nombre: a.nombre,
@@ -75,16 +74,13 @@ export const obtenerAlumnos = async (req, res) => {
                 curp: a.curp,
                 email: a.email,
                 telefono: a.telefono,
-                carrera: a.carrera.nombre,
-                carreraId: a.carreraId,
-                semestre: a.semestre,
-                estatus: a.estatus,
-                promedio: a.promedio,
-                creditosAcumulados: a.creditosAcumulados,
-                fechaIngreso: a.fechaIngreso,
-                solicitudId: a.solicitud?.id,
-                folio: a.solicitud?.folio,
-                estatusPago: a.solicitud?.estatusPago,
+                carrera: a.fichaExamen?.carrera?.nombre || 'Sin asignar',
+                carreraId: a.fichaExamen?.carreraId,
+                semestre: a.semestreActual || 1,
+                estatus: a.estatusAlumno,
+                folio: a.fichaExamen?.folio,
+                solicitudId: a.solicitudes?.[0]?.id,
+                estatusPago: a.solicitudes?.[0]?.estatusPago,
                 createdAt: a.createdAt
             })),
             pagination: {
@@ -114,11 +110,17 @@ export const obtenerAlumnoPorId = async (req, res) => {
         const alumno = await prisma.alumno.findUnique({
             where: { id: parseInt(id) },
             include: {
-                carrera: true,
-                solicitud: {
+                fichaExamen: {
+                    include: {
+                        carrera: true
+                    }
+                },
+                solicitudes: {
                     include: {
                         documentos: true
-                    }
+                    },
+                    orderBy: { fechaSolicitud: 'desc' },
+                    take: 1
                 }
             }
         });
@@ -129,34 +131,30 @@ export const obtenerAlumnoPorId = async (req, res) => {
             });
         }
 
+        const ultimaSolicitud = alumno.solicitudes?.[0];
+
         res.json({
             id: alumno.id,
-            numeroControl: alumno.numeroControl,
             nombre: alumno.nombre,
             apellidoPaterno: alumno.apellidoPaterno,
             apellidoMaterno: alumno.apellidoMaterno,
             curp: alumno.curp,
             fechaNacimiento: alumno.fechaNacimiento,
-            genero: alumno.genero,
             email: alumno.email,
             telefono: alumno.telefono,
             direccion: alumno.direccion,
-            carrera: {
-                id: alumno.carrera.id,
-                nombre: alumno.carrera.nombre,
-                codigo: alumno.carrera.codigo
-            },
-            semestre: alumno.semestre,
-            estatus: alumno.estatus,
-            promedio: alumno.promedio,
-            creditosAcumulados: alumno.creditosAcumulados,
-            fechaIngreso: alumno.fechaIngreso,
-            fechaEgreso: alumno.fechaEgreso,
-            solicitud: alumno.solicitud ? {
-                id: alumno.solicitud.id,
-                folio: alumno.solicitud.folio,
-                estatusPago: alumno.solicitud.estatusPago,
-                documentos: alumno.solicitud.documentos
+            carrera: alumno.fichaExamen?.carrera ? {
+                id: alumno.fichaExamen.carrera.id,
+                nombre: alumno.fichaExamen.carrera.nombre,
+                codigo: alumno.fichaExamen.carrera.codigo
+            } : null,
+            semestre: alumno.semestreActual || 1,
+            estatus: alumno.estatusAlumno,
+            folio: alumno.fichaExamen?.folio,
+            solicitud: ultimaSolicitud ? {
+                id: ultimaSolicitud.id,
+                estatusPago: ultimaSolicitud.estatusPago,
+                documentos: ultimaSolicitud.documentos
             } : null,
             createdAt: alumno.createdAt,
             updatedAt: alumno.updatedAt
@@ -170,66 +168,44 @@ export const obtenerAlumnoPorId = async (req, res) => {
 };
 
 /**
- * Crear nuevo alumno (desde solicitud aceptada)
+ * Crear nuevo alumno (desde ficha de examen aprobada)
  * POST /api/alumnos
  */
 export const crearAlumno = async (req, res) => {
     try {
         const {
-            solicitudId,
-            numeroControl,
+            fichaExamenId,
             nombre,
             apellidoPaterno,
             apellidoMaterno,
             curp,
             fechaNacimiento,
-            genero,
             email,
             telefono,
             direccion,
-            carreraId,
             semestre = 1
         } = req.body;
 
-        // Verificar que la solicitud existe y está aceptada
-        if (solicitudId) {
-            const solicitud = await prisma.solicitud.findUnique({
-                where: { id: parseInt(solicitudId) }
+        // Verificar que la ficha existe
+        if (fichaExamenId) {
+            const ficha = await prisma.fichaExamen.findUnique({
+                where: { id: parseInt(fichaExamenId) }
             });
 
-            if (!solicitud) {
+            if (!ficha) {
                 return res.status(404).json({
-                    error: 'Solicitud no encontrada'
+                    error: 'Ficha de examen no encontrada'
                 });
             }
 
-            if (solicitud.estatus !== 'aceptada') {
-                return res.status(400).json({
-                    error: 'La solicitud debe estar aceptada para crear un alumno'
-                });
-            }
-
-            // Verificar que no exista ya un alumno con esta solicitud
+            // Verificar que no exista ya un alumno con esta ficha
             const alumnoExistente = await prisma.alumno.findUnique({
-                where: { solicitudId: parseInt(solicitudId) }
+                where: { fichaExamenId: parseInt(fichaExamenId) }
             });
 
             if (alumnoExistente) {
                 return res.status(400).json({
-                    error: 'Ya existe un alumno registrado con esta solicitud'
-                });
-            }
-        }
-
-        // Verificar que el número de control no exista
-        if (numeroControl) {
-            const controlExistente = await prisma.alumno.findUnique({
-                where: { numeroControl }
-            });
-
-            if (controlExistente) {
-                return res.status(400).json({
-                    error: 'El número de control ya está registrado'
+                    error: 'Ya existe un alumno registrado con esta ficha'
                 });
             }
         }
@@ -245,28 +221,38 @@ export const crearAlumno = async (req, res) => {
             });
         }
 
+        // Verificar que el email no exista
+        const emailExistente = await prisma.alumno.findUnique({
+            where: { email: email.toLowerCase() }
+        });
+
+        if (emailExistente) {
+            return res.status(400).json({
+                error: 'El email ya está registrado'
+            });
+        }
+
         // Crear alumno
         const alumno = await prisma.alumno.create({
             data: {
-                solicitudId: solicitudId ? parseInt(solicitudId) : undefined,
-                numeroControl: numeroControl || `TEMP-${Date.now()}`,
+                fichaExamenId: fichaExamenId ? parseInt(fichaExamenId) : undefined,
                 nombre,
                 apellidoPaterno,
                 apellidoMaterno,
                 curp: curp.toUpperCase(),
                 fechaNacimiento: new Date(fechaNacimiento),
-                genero,
                 email: email.toLowerCase(),
                 telefono,
                 direccion,
-                carreraId: parseInt(carreraId),
-                semestre: parseInt(semestre),
-                estatus: 'activo',
-                fechaIngreso: new Date()
+                semestreActual: parseInt(semestre),
+                estatusAlumno: 'activo'
             },
             include: {
-                carrera: true,
-                solicitud: true
+                fichaExamen: {
+                    include: {
+                        carrera: true
+                    }
+                }
             }
         });
 
@@ -275,10 +261,9 @@ export const crearAlumno = async (req, res) => {
             message: 'Alumno registrado exitosamente',
             alumno: {
                 id: alumno.id,
-                numeroControl: alumno.numeroControl,
                 nombre: `${alumno.nombre} ${alumno.apellidoPaterno} ${alumno.apellidoMaterno}`,
-                carrera: alumno.carrera.nombre,
-                estatus: alumno.estatus
+                carrera: alumno.fichaExamen?.carrera?.nombre || 'Sin asignar',
+                estatus: alumno.estatusAlumno
             }
         });
     } catch (error) {
@@ -298,14 +283,11 @@ export const actualizarAlumno = async (req, res) => {
     try {
         const { id } = req.params;
         const {
-            numeroControl,
             email,
             telefono,
             direccion,
             semestre,
-            estatus,
-            promedio,
-            creditosAcumulados
+            estatus
         } = req.body;
 
         const alumno = await prisma.alumno.findUnique({
@@ -318,15 +300,15 @@ export const actualizarAlumno = async (req, res) => {
             });
         }
 
-        // Si se cambia el número de control, verificar que no exista
-        if (numeroControl && numeroControl !== alumno.numeroControl) {
-            const controlExistente = await prisma.alumno.findUnique({
-                where: { numeroControl }
+        // Si se cambia el email, verificar que no exista
+        if (email && email.toLowerCase() !== alumno.email) {
+            const emailExistente = await prisma.alumno.findUnique({
+                where: { email: email.toLowerCase() }
             });
 
-            if (controlExistente) {
+            if (emailExistente) {
                 return res.status(400).json({
-                    error: 'El número de control ya está registrado'
+                    error: 'El email ya está registrado'
                 });
             }
         }
@@ -334,17 +316,18 @@ export const actualizarAlumno = async (req, res) => {
         const alumnoActualizado = await prisma.alumno.update({
             where: { id: parseInt(id) },
             data: {
-                numeroControl: numeroControl || undefined,
                 email: email ? email.toLowerCase() : undefined,
                 telefono: telefono || undefined,
                 direccion: direccion || undefined,
-                semestre: semestre ? parseInt(semestre) : undefined,
-                estatus: estatus || undefined,
-                promedio: promedio ? parseFloat(promedio) : undefined,
-                creditosAcumulados: creditosAcumulados ? parseInt(creditosAcumulados) : undefined
+                semestreActual: semestre ? parseInt(semestre) : undefined,
+                estatusAlumno: estatus || undefined
             },
             include: {
-                carrera: true
+                fichaExamen: {
+                    include: {
+                        carrera: true
+                    }
+                }
             }
         });
 
@@ -353,10 +336,9 @@ export const actualizarAlumno = async (req, res) => {
             message: 'Alumno actualizado exitosamente',
             alumno: {
                 id: alumnoActualizado.id,
-                numeroControl: alumnoActualizado.numeroControl,
                 nombre: `${alumnoActualizado.nombre} ${alumnoActualizado.apellidoPaterno} ${alumnoActualizado.apellidoMaterno}`,
-                estatus: alumnoActualizado.estatus,
-                semestre: alumnoActualizado.semestre
+                estatus: alumnoActualizado.estatusAlumno,
+                semestre: alumnoActualizado.semestreActual
             }
         });
     } catch (error) {
@@ -377,7 +359,7 @@ export const cambiarEstatusAlumno = async (req, res) => {
         const { id } = req.params;
         const { estatus, motivo } = req.body;
 
-        const estatusValidos = ['activo', 'baja_temporal', 'egresado', 'baja_definitiva'];
+        const estatusValidos = ['aspirante', 'activo', 'baja_temporal', 'egresado', 'baja_definitiva'];
 
         if (!estatusValidos.includes(estatus)) {
             return res.status(400).json({
@@ -399,21 +381,20 @@ export const cambiarEstatusAlumno = async (req, res) => {
         const alumnoActualizado = await prisma.alumno.update({
             where: { id: parseInt(id) },
             data: {
-                estatus,
-                fechaEgreso: estatus === 'egresado' ? new Date() : undefined
+                estatusAlumno: estatus
             }
         });
 
         // Registrar en auditoría
         await prisma.auditoria.create({
             data: {
-                usuarioId: req.user.id,
-                accion: 'cambio_estatus_alumno',
-                entidad: 'alumno',
-                entidadId: parseInt(id),
-                detalles: {
-                    estatusAnterior: alumno.estatus,
-                    estatusNuevo: estatus,
+                tablaAfectada: 'alumnos',
+                registroId: parseInt(id),
+                accion: 'UPDATE',
+                usuarioId: req.user?.id || null,
+                datosAnteriores: { estatusAlumno: alumno.estatusAlumno },
+                datosNuevos: {
+                    estatusAlumno: estatus,
                     motivo: motivo || 'Sin motivo especificado'
                 }
             }
@@ -424,8 +405,8 @@ export const cambiarEstatusAlumno = async (req, res) => {
             message: `Estatus cambiado a: ${estatus}`,
             alumno: {
                 id: alumnoActualizado.id,
-                numeroControl: alumnoActualizado.numeroControl,
-                estatus: alumnoActualizado.estatus
+                nombre: `${alumnoActualizado.nombre} ${alumnoActualizado.apellidoPaterno} ${alumnoActualizado.apellidoMaterno}`,
+                estatus: alumnoActualizado.estatusAlumno
             }
         });
     } catch (error) {
@@ -448,33 +429,42 @@ export const obtenerEstadisticas = async (req, res) => {
             egresados,
             bajaTemporal,
             bajaDefinitiva,
-            porCarrera
+            aspirantes
         ] = await Promise.all([
             prisma.alumno.count(),
-            prisma.alumno.count({ where: { estatus: 'activo' } }),
-            prisma.alumno.count({ where: { estatus: 'egresado' } }),
-            prisma.alumno.count({ where: { estatus: 'baja_temporal' } }),
-            prisma.alumno.count({ where: { estatus: 'baja_definitiva' } }),
-            prisma.alumno.groupBy({
-                by: ['carreraId'],
-                _count: true
-            })
+            prisma.alumno.count({ where: { estatusAlumno: 'activo' } }),
+            prisma.alumno.count({ where: { estatusAlumno: 'egresado' } }),
+            prisma.alumno.count({ where: { estatusAlumno: 'baja_temporal' } }),
+            prisma.alumno.count({ where: { estatusAlumno: 'baja_definitiva' } }),
+            prisma.alumno.count({ where: { estatusAlumno: 'aspirante' } })
         ]);
 
-        // Obtener nombres de carreras
-        const carreras = await prisma.carrera.findMany({
+        // Obtener alumnos con sus fichas para agrupar por carrera
+        const alumnosConCarrera = await prisma.alumno.findMany({
             where: {
-                id: { in: porCarrera.map(c => c.carreraId) }
+                fichaExamenId: { not: null }
+            },
+            include: {
+                fichaExamen: {
+                    include: {
+                        carrera: true
+                    }
+                }
             }
         });
 
-        const porCarreraConNombres = porCarrera.map(item => {
-            const carrera = carreras.find(c => c.id === item.carreraId);
-            return {
-                carrera: carrera?.nombre || 'Desconocida',
-                total: item._count
-            };
+        // Agrupar por carrera manualmente
+        const porCarreraMap = new Map();
+        alumnosConCarrera.forEach(alumno => {
+            const carreraNombre = alumno.fichaExamen?.carrera?.nombre || 'Sin asignar';
+            const count = porCarreraMap.get(carreraNombre) || 0;
+            porCarreraMap.set(carreraNombre, count + 1);
         });
+
+        const porCarreraConNombres = Array.from(porCarreraMap.entries()).map(([carrera, total]) => ({
+            carrera,
+            total
+        }));
 
         res.json({
             total: totalAlumnos,
@@ -482,7 +472,8 @@ export const obtenerEstadisticas = async (req, res) => {
                 activo: activos,
                 egresado: egresados,
                 bajaTemporal,
-                bajaDefinitiva
+                bajaDefinitiva,
+                aspirante: aspirantes
             },
             porCarrera: porCarreraConNombres
         });

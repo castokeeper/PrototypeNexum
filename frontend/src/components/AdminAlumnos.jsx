@@ -131,6 +131,7 @@ const AdminAlumnos = () => {
 
     const getEstatusBadge = (estatus) => {
         const config = {
+            aspirante: { variant: 'default', text: 'Aspirante' },
             activo: { variant: 'success', text: 'Activo' },
             baja_temporal: { variant: 'warning', text: 'Baja Temporal' },
             egresado: { variant: 'info', text: 'Egresado' },
@@ -256,12 +257,11 @@ const AdminAlumnos = () => {
                             <table style={tableStyle}>
                                 <thead>
                                     <tr>
-                                        <th style={thStyle}>No. Control</th>
+                                        <th style={thStyle}>Folio</th>
                                         <th style={thStyle}>Nombre</th>
                                         <th style={thStyle}>CURP</th>
                                         <th style={thStyle}>Carrera</th>
                                         <th style={thStyle}>Semestre</th>
-                                        <th style={thStyle}>Promedio</th>
                                         <th style={thStyle}>Estatus</th>
                                         <th style={thStyle}>Acciones</th>
                                     </tr>
@@ -270,7 +270,7 @@ const AdminAlumnos = () => {
                                     {alumnos.map(alumno => (
                                         <tr key={alumno.id} style={trStyle}>
                                             <td style={tdStyle}>
-                                                <strong>{alumno.numeroControl}</strong>
+                                                <strong>{alumno.folio || '-'}</strong>
                                             </td>
                                             <td style={tdStyle}>{alumno.nombre}</td>
                                             <td style={tdStyle}>
@@ -278,9 +278,6 @@ const AdminAlumnos = () => {
                                             </td>
                                             <td style={tdStyle}>{alumno.carrera}</td>
                                             <td style={tdStyle}>{alumno.semestre}°</td>
-                                            <td style={tdStyle}>
-                                                {alumno.promedio ? alumno.promedio.toFixed(1) : 'N/A'}
-                                            </td>
                                             <td style={tdStyle}>
                                                 {getEstatusBadge(alumno.estatus)}
                                             </td>

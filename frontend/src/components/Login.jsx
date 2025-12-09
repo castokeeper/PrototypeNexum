@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { toast } from 'react-toastify';
 import { Lock, User, LogIn, ShieldCheck, Sparkles, Eye, EyeOff } from 'lucide-react';
 import { Button, Input, Card } from './common';
@@ -8,6 +9,7 @@ import { Button, Input, Card } from './common';
 const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
+  const { isDark } = useTheme();
   const [credentials, setCredentials] = useState({
     username: '',
     password: ''
@@ -34,7 +36,7 @@ const Login = () => {
       const result = await login(credentials.username, credentials.password);
 
       if (result.success) {
-        toast.success(`¡Bienvenido ${result.usuario.nombre}! 🎉`);
+        toast.success(`Bienvenido, ${result.usuario.nombre}`);
         navigate('/admin');
       } else {
         toast.error(result.message);
@@ -44,6 +46,41 @@ const Login = () => {
       console.error('Error en login:', error);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  // Estilos basados en tema
+  const styles = {
+    card: {
+      backgroundColor: isDark ? '#1e293b' : '#ffffff',
+      borderColor: isDark ? '#334155' : '#e2e8f0'
+    },
+    demoBox: {
+      backgroundColor: isDark ? '#334155' : '#f1f5f9',
+      borderColor: isDark ? '#475569' : '#cbd5e1'
+    },
+    demoItem: {
+      backgroundColor: 'transparent'
+    },
+    demoItemHover: isDark ? 'rgba(59, 130, 246, 0.1)' : '#eff6ff',
+    badge: {
+      admin: {
+        backgroundColor: isDark ? 'rgba(59, 130, 246, 0.2)' : '#dbeafe',
+        color: isDark ? '#93c5fd' : '#1d4ed8'
+      },
+      director: {
+        backgroundColor: isDark ? 'rgba(139, 92, 246, 0.2)' : '#ede9fe',
+        color: isDark ? '#c4b5fd' : '#6d28d9'
+      },
+      control: {
+        backgroundColor: isDark ? 'rgba(16, 185, 129, 0.2)' : '#d1fae5',
+        color: isDark ? '#6ee7b7' : '#047857'
+      }
+    },
+    username: {
+      admin: { color: isDark ? '#60a5fa' : '#2563eb' },
+      director: { color: isDark ? '#a78bfa' : '#7c3aed' },
+      control: { color: isDark ? '#34d399' : '#059669' }
     }
   };
 
@@ -58,7 +95,10 @@ const Login = () => {
 
       {/* Login Card */}
       <div className="relative z-10 w-full max-w-md scale-in">
-        <Card className="backdrop-blur-sm bg-white/90 dark:bg-slate-900/90 border border-white/20 shadow-2xl">
+        <Card
+          className="backdrop-blur-sm border shadow-2xl"
+          style={styles.card}
+        >
           {/* Header */}
           <div className="text-center p-8 pb-6">
             <div className="inline-flex p-4 rounded-2xl gradient-bg mb-4 hover-glow">
@@ -109,8 +149,11 @@ const Login = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-[38px] p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                  style={{ color: 'var(--text-secondary)' }}
+                  className="absolute right-3 top-[38px] p-1.5 rounded-lg transition-colors"
+                  style={{
+                    color: 'var(--text-secondary)',
+                    backgroundColor: 'transparent'
+                  }}
                   tabIndex={-1}
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -137,25 +180,46 @@ const Login = () => {
 
           {/* Demo Users Info */}
           <div className="px-8 pb-8">
-            <div className="p-4 rounded-xl border-2 border-dashed" style={{
-              borderColor: 'var(--border-color)',
-              backgroundColor: 'var(--bg-hover)'
-            }}>
+            <div
+              className="p-4 rounded-xl border-2 border-dashed"
+              style={styles.demoBox}
+            >
               <p className="text-sm font-semibold mb-3 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
-                👤 Usuarios de demostración
+                Usuarios de demostracion
               </p>
               <div className="space-y-2 text-xs" style={{ color: 'var(--text-secondary)' }}>
-                <div className="flex items-center justify-between p-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
-                  <span><strong className="text-blue-600 dark:text-blue-400">admin</strong> / admin123</span>
-                  <span className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-xs">Admin</span>
+                <div className="flex items-center justify-between p-2 rounded-lg transition-colors">
+                  <span>
+                    <strong style={styles.username.admin}>admin</strong> / admin123
+                  </span>
+                  <span
+                    className="px-2 py-0.5 rounded-full text-xs"
+                    style={styles.badge.admin}
+                  >
+                    Admin
+                  </span>
                 </div>
-                <div className="flex items-center justify-between p-2 rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors">
-                  <span><strong className="text-purple-600 dark:text-purple-400">director</strong> / director123</span>
-                  <span className="px-2 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full text-xs">Director</span>
+                <div className="flex items-center justify-between p-2 rounded-lg transition-colors">
+                  <span>
+                    <strong style={styles.username.director}>director</strong> / director123
+                  </span>
+                  <span
+                    className="px-2 py-0.5 rounded-full text-xs"
+                    style={styles.badge.director}
+                  >
+                    Director
+                  </span>
                 </div>
-                <div className="flex items-center justify-between p-2 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors">
-                  <span><strong className="text-green-600 dark:text-green-400">control</strong> / control123</span>
-                  <span className="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full text-xs">Control</span>
+                <div className="flex items-center justify-between p-2 rounded-lg transition-colors">
+                  <span>
+                    <strong style={styles.username.control}>control</strong> / control123
+                  </span>
+                  <span
+                    className="px-2 py-0.5 rounded-full text-xs"
+                    style={styles.badge.control}
+                  >
+                    Control
+                  </span>
                 </div>
               </div>
             </div>

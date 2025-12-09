@@ -509,63 +509,101 @@ const FormularioInscripcion = () => {
         </div>
     );
 
-    const renderDatosInscripcion = () => (
-        <div className="space-y-4">
-            <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                <FileText className="w-6 h-6 text-blue-600" />
-                Datos de Inscripción
-            </h3>
+    const renderDatosInscripcion = () => {
+        // Grupos disponibles (mismos para ambos turnos: A-F)
+        const gruposDisponibles = datosInscripcion.turno
+            ? ['A', 'B', 'C', 'D', 'E', 'F']
+            : [];
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Carrera *
-                    </label>
-                    <select
-                        value={datosInscripcion.carreraId}
-                        onChange={(e) => setDatosInscripcion({ ...datosInscripcion, carreraId: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                        required
-                    >
-                        <option value="">Seleccionar carrera...</option>
-                        {carreras.map(carrera => (
-                            <option key={carrera.id} value={carrera.id}>
-                                {carrera.nombre}
+        return (
+            <div className="space-y-4">
+                <h3 className="text-xl font-bold mb-4 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+                    <FileText className="w-6 h-6" style={{ color: 'var(--primary-blue)' }} />
+                    Datos de Inscripción
+                </h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-primary)' }}>
+                            Carrera Técnica *
+                        </label>
+                        <select
+                            value={datosInscripcion.carreraId}
+                            onChange={(e) => setDatosInscripcion({ ...datosInscripcion, carreraId: e.target.value })}
+                            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                            style={{
+                                backgroundColor: 'var(--bg-primary)',
+                                color: 'var(--text-primary)',
+                                borderColor: 'var(--border-color)'
+                            }}
+                            required
+                        >
+                            <option value="">Seleccionar carrera...</option>
+                            {carreras.map(carrera => (
+                                <option key={carrera.id} value={carrera.id}>
+                                    {carrera.nombre}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-primary)' }}>
+                            Turno *
+                        </label>
+                        <select
+                            value={datosInscripcion.turno}
+                            onChange={(e) => setDatosInscripcion({
+                                ...datosInscripcion,
+                                turno: e.target.value,
+                                grupo: '' // Resetear grupo al cambiar turno
+                            })}
+                            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                            style={{
+                                backgroundColor: 'var(--bg-primary)',
+                                color: 'var(--text-primary)',
+                                borderColor: 'var(--border-color)'
+                            }}
+                            required
+                        >
+                            <option value="">Seleccionar turno...</option>
+                            <option value="matutino">Matutino</option>
+                            <option value="vespertino">Vespertino</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-primary)' }}>
+                            Grupo (Opcional)
+                        </label>
+                        <select
+                            value={datosInscripcion.grupo}
+                            onChange={(e) => setDatosInscripcion({ ...datosInscripcion, grupo: e.target.value })}
+                            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                            style={{
+                                backgroundColor: 'var(--bg-primary)',
+                                color: 'var(--text-primary)',
+                                borderColor: 'var(--border-color)'
+                            }}
+                            disabled={!datosInscripcion.turno}
+                        >
+                            <option value="">
+                                {datosInscripcion.turno ? 'Seleccionar grupo...' : 'Selecciona primero un turno'}
                             </option>
-                        ))}
-                    </select>
-                </div>
-
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Turno *
-                    </label>
-                    <select
-                        value={datosInscripcion.turno}
-                        onChange={(e) => setDatosInscripcion({ ...datosInscripcion, turno: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                        required
-                    >
-                        <option value="">Seleccionar turno...</option>
-                        <option value="matutino">Matutino</option>
-                        <option value="vespertino">Vespertino</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Grupo (Opcional)
-                    </label>
-                    <input
-                        type="text"
-                        value={datosInscripcion.grupo}
-                        onChange={(e) => setDatosInscripcion({ ...datosInscripcion, grupo: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    />
+                            {gruposDisponibles.map(grupo => (
+                                <option key={grupo} value={grupo}>
+                                    Grupo {grupo}
+                                </option>
+                            ))}
+                        </select>
+                        <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>
+                            El grupo será asignado según disponibilidad
+                        </p>
+                    </div>
                 </div>
             </div>
-        </div>
-    );
+        );
+    };
 
     const renderConfirmacion = () => (
         <div className="text-center py-12">
@@ -637,8 +675,8 @@ const FormularioInscripcion = () => {
                                     onClick={handleBack}
                                     disabled={step === 1}
                                     className={`px-6 py-3 rounded-lg font-semibold flex items-center gap-2 ${step === 1
-                                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                                         }`}
                                 >
                                     <ArrowLeft className="w-5 h-5" />
@@ -659,8 +697,8 @@ const FormularioInscripcion = () => {
                                         type="submit"
                                         disabled={loading}
                                         className={`px-6 py-3 rounded-lg font-semibold flex items-center gap-2 ${loading
-                                                ? 'bg-gray-400 cursor-not-allowed'
-                                                : 'bg-green-600 hover:bg-green-700'
+                                            ? 'bg-gray-400 cursor-not-allowed'
+                                            : 'bg-green-600 hover:bg-green-700'
                                             } text-white`}
                                     >
                                         {loading ? 'Enviando...' : 'Enviar Formulario'}

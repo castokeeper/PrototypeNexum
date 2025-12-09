@@ -334,20 +334,15 @@ Ver reporte completo en [`backend/SECURITY-AUDIT.md`](./backend/SECURITY-AUDIT.m
 
 ---
 
-## 📖 Documentación
+## Documentación
 
 | Documento | Descripción |
 |-----------|-------------|
 | [`README.md`](./README.md) | Este archivo |
-| [`docs/dev-log/DEV-LOG.md`](./docs/dev-log/DEV-LOG.md) | Bitácora de desarrollo - Historial de cambios |
-| [`MIGRATION.md`](./MIGRATION.md) | Guía de cambios de estructura |
-| [`PAYMENT-SYSTEMS.md`](./PAYMENT-SYSTEMS.md) | Opciones de sistemas de pago |
-| [`DATABASE-SCHEMA.md`](./DATABASE-SCHEMA.md) | Schema completo de la BD |
-| [`backend/SETUP.md`](./backend/SETUP.md) | Configuración del backend |
+| [`docs/dev-log/DEV-LOG.md`](./docs/dev-log/DEV-LOG.md) | Bitácora de desarrollo |
+| [`STRIPE-SETUP.md`](./STRIPE-SETUP.md) | Configuración de Stripe |
 | [`backend/AZURE-SETUP.md`](./backend/AZURE-SETUP.md) | Guía de Azure PostgreSQL |
-| [`backend/AZURE-CHECKLIST.md`](./backend/AZURE-CHECKLIST.md) | Checklist de Azure |
 | [`backend/SECURITY-AUDIT.md`](./backend/SECURITY-AUDIT.md) | Reporte de seguridad |
-| [`frontend/README.md`](./frontend/README.md) | Documentación del frontend |
 
 ---
 

@@ -70,7 +70,7 @@ const ConsultaFicha = () => {
             pendiente: 'Pendiente de Programación',
             programado: 'Examen Programado',
             presentado: 'Examen Presentado',
-            aprobado: '✓ Aprobado',
+            aprobado: 'Aprobado',
             rechazado: '✗ No Aprobado',
             cancelado: 'Cancelado'
         };
@@ -270,7 +270,7 @@ const ConsultaFicha = () => {
                                     }}>
                                         <Sparkles className="w-12 h-12 mx-auto mb-3 text-yellow-400" />
                                         <h4 className="text-xl font-bold mb-2" style={{ color: 'var(--success-green)' }}>
-                                            🎉 ¡Felicidades!
+                                            Felicidades
                                         </h4>
                                         <p style={{ color: 'var(--text-secondary)' }}>
                                             Has sido aceptado. Pronto recibirás más información para completar tu inscripción.
