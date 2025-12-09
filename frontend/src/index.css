@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* Configuración del tema Tailwind v4.1 */
+/* Configuración de Tailwind */
 @theme {
   /* Colores personalizados */
   --color-primary-50: #eff6ff;

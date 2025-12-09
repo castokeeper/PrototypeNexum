@@ -1,6 +1,30 @@
 # Sistema de Reinscripciones
 
+<!-- Badges de Estado -->
+![Version](https://img.shields.io/badge/version-1.0.0-blue)
+![Status](https://img.shields.io/badge/status-operational-success)
+![License](https://img.shields.io/badge/license-MIT-green)
+
+<!-- Badges de Frontend -->
+![React](https://img.shields.io/badge/React-19.1.1-61DAFB?logo=react&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-7.1.14-646CFF?logo=vite&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/TailwindCSS-4.1.17-06B6D4?logo=tailwindcss&logoColor=white)
+![React Router](https://img.shields.io/badge/React_Router-7.9.4-CA4245?logo=reactrouter&logoColor=white)
+
+<!-- Badges de Backend -->
+![Express](https://img.shields.io/badge/Express-5.1.0-000000?logo=express&logoColor=white)
+![Prisma](https://img.shields.io/badge/Prisma-6.19.0-2D3748?logo=prisma&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15+-4169E1?logo=postgresql&logoColor=white)
+![JWT](https://img.shields.io/badge/JWT-Auth-000000?logo=jsonwebtokens&logoColor=white)
+
+<!-- Badges de Servicios -->
+![Stripe](https://img.shields.io/badge/Stripe-Payments-635BFF?logo=stripe&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=nodedotjs&logoColor=white)
+
+---
+
 Sistema web completo con frontend (React + Vite) y backend (Express + Prisma + PostgreSQL) para gestionar el proceso de inscripción y reinscripción de alumnos con panel administrativo.
+
 
 ## 🏗️ Arquitectura Monorepo
 
@@ -315,6 +339,7 @@ Ver reporte completo en [`backend/SECURITY-AUDIT.md`](./backend/SECURITY-AUDIT.m
 | Documento | Descripción |
 |-----------|-------------|
 | [`README.md`](./README.md) | Este archivo |
+| [`docs/dev-log/DEV-LOG.md`](./docs/dev-log/DEV-LOG.md) | Bitácora de desarrollo - Historial de cambios |
 | [`MIGRATION.md`](./MIGRATION.md) | Guía de cambios de estructura |
 | [`PAYMENT-SYSTEMS.md`](./PAYMENT-SYSTEMS.md) | Opciones de sistemas de pago |
 | [`DATABASE-SCHEMA.md`](./DATABASE-SCHEMA.md) | Schema completo de la BD |
